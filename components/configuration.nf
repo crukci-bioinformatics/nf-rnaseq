@@ -234,3 +234,71 @@ def checkKickstartCSV(params)
 
     return ok
 }
+
+
+
+
+/*
+ * Check the RNAseq sample sheet file has the necessary minimum columns to run
+ * in the configured mode and that each line in the file has those mandatory
+ * values set.
+ */
+def checkRNAseqSampleSheet(params)
+{
+    def ok = true
+    try
+    {
+        def driverFile = file(params.sampleSheet)
+        driverFile.withReader('UTF-8')
+        {
+            stream ->
+            def parser = CSVParser.parse(stream, CSVFormat.DEFAULT.withHeader())
+            def first = true
+
+            for (record in parser)
+            {
+                if (first)
+                {
+                    if (!record.isMapped('SampleName'))
+                    {
+                        log.error "${params.sampleSheet} must contain a column 'SampleName'."
+                        ok = false
+                    }
+
+                    if (!record.isMapped('SampleGroup'))
+                    {
+                        log.error "${params.sampleSheet} must contain a column 'SampleGroup'."
+                        ok = false
+                    }
+
+                    first = false
+                    if (!ok)
+                    {
+                        break
+                    }
+                }
+
+                def rowNum = parser.recordNumber + 1
+                if (!record.get('SampleName'))
+                {
+                    log.error "No 'SampleName' file name set on line ${rowNum}."
+                    ok = false
+                }
+                
+                
+                if (!record.get('SampleGroup'))
+                {
+                    log.error "No 'SampleGroup' defined on line ${rowNum}."
+                    ok = false
+                }
+            }
+        }
+    }
+    catch (Exception e)
+    {
+        logException(e)
+        ok = false
+    }
+
+    return ok
+}

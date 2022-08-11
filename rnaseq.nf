@@ -18,6 +18,11 @@ if (!checkKickstartCSV(params))
 {
     exit 1
 }
+if (!checkRNAseqSampleSheet(params))
+{
+    exit 1
+}
+
 
 switch (params.quantTool)
 {
