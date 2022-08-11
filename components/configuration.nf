@@ -210,19 +210,33 @@ def checkKickstartCSV(params)
                 def rowNum = parser.recordNumber + 1
                 if (!record.get('Read1'))
                 {
-                    log.error "No 'Read1' file name set on line ${rowNum}."
+                    log.error "In ${params.kickstartCSV} file; No 'Read1' file name set on line ${rowNum}."
                     ok = false
                 }
                 if (params.pairedEnd && !record.get('Read2'))
                 {
-                    log.error "No 'Read2' file name set on line ${rowNum}."
+                    log.error "In ${params.kickstartCSV} file; No 'Read2' file name set on line ${rowNum}."
                     ok = false
                 }
+
                 if (!record.get('SampleName'))
                 {
-                    log.error "No 'SampleName' defined on line ${rowNum}."
+                    log.error "In ${params.kickstartCSV} file; No 'SampleName' defined on line ${rowNum}."
                     ok = false
+                } else {
+                    s = record.get('SampleName')
+                    if (Character.isDigit(s.charAt(0)))
+                    {
+                        log.error "In ${params.kickstartCSV} file; Sample name '${s}', can not start with a number on line ${rowNum}."
+                        ok = false
+                    }
+                    if (!s.matches("[a-zA-Z0-9._]*"))
+                    {
+                        log.error "In ${params.kickstartCSV} file; Sample name '${s}'', can not contain white space and/or special character line ${rowNum}. Only 'a-z,A-Z,0-9, .,and _' are allowed"
+                        ok = false
+                    }
                 }
+                
             }
         }
     }
@@ -281,8 +295,20 @@ def checkRNAseqSampleSheet(params)
                 def rowNum = parser.recordNumber + 1
                 if (!record.get('SampleName'))
                 {
-                    log.error "No 'SampleName' file name set on line ${rowNum}."
+                    log.error "In ${params.sampleSheet} file,  No 'SampleName' file name set on line ${rowNum}."
                     ok = false
+                } else {
+                    s = record.get('SampleName')
+                    if (Character.isDigit(s.charAt(0)))
+                    {
+                        log.error "In ${params.sampleSheet} file, Sample name ${s}, can not start with a number on line ${rowNum}."
+                        ok = false
+                    }
+                    if (!s.matches("[a-zA-Z0-9._]*"))
+                    {
+                        log.error "In ${params.sampleSheet} file, Sample name ${s}, can not contain white space and/or special character line ${rowNum}. Only 'a-z,A-Z,0-9, .,and _' are allowed"
+                        ok = false
+                    }
                 }
                 
                 
@@ -290,6 +316,20 @@ def checkRNAseqSampleSheet(params)
                 {
                     log.error "No 'SampleGroup' defined on line ${rowNum}."
                     ok = false
+                } else {
+
+                    s = record.get('SampleGroup')
+                    if (Character.isDigit(s.charAt(0)))
+                    {
+                        log.error "In ${params.sampleSheet} file, Sample group '${s}'', can not start with a number on line ${rowNum}."
+                        ok = false
+                    }
+                    if (!s.matches("[a-zA-Z0-9._]*"))
+                    {
+                        log.error "In ${params.sampleSheet} file, Sample group '${s}', can not contain white space and/or special character line ${rowNum}. Only 'a-z,A-Z,0-9, .,and _' are allowed"
+                        ok = false
+                    }
+
                 }
             }
         }
