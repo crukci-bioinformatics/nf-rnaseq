@@ -6,7 +6,7 @@
 
 nextflow.enable.dsl = 2
 
-include { checkParameters; checkKickstartCSV; displayParameters } from "./components/configuration"
+include { checkParameters; checkKickstartCSV; displayParameters; checkRNAseqSampleSheet  } from "./components/configuration"
 
 // Check all is well with the parameters and the alignment.csv file.
 
