@@ -113,7 +113,7 @@ rnaSeqReport <- function(opts){
   templateDir = opts$templateDir
   reportFile = opts$reportFile
 
-  reportTemplate = system.file("extdata/rnaSeqReport.Rmd",package = "rnaseqRcode")
+  reportTemplate = system.file("extdata/rnaseqReport.Rmd",package = "rnaseqRcode")
   assert_that(reportTemplate != "",msg = "reportTemplate missing")
 
   reportWritableTemplate <- file.path(templateDir,basename(reportTemplate))
