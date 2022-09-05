@@ -17,7 +17,7 @@ RUN dnf install -y \
     python3 python3-psycopg2 \
     R-core R-devel \
     unzip wget xz-devel zlib-devel \
-    harfbuzz-devel libtiff-devel libjpeg-devel fribidi-devel
+    harfbuzz-devel libtiff-devel libjpeg-devel fribidi-devel pandoc
 RUN mkdir -p ${INSTALL_DIR} ${BUILD_DIR}
 ARG CONDA_VERSION=py39_4.11.0
 ARG CONDA_MD5=4e2f31e0b2598634c80daa12e4981647
@@ -33,11 +33,11 @@ RUN /opt/conda/bin/conda config --add channels bioconda
 RUN /opt/conda/bin/conda install salmon=1.8.0
 
 RUN /usr/bin/R --vanilla -e \
-    "install.packages(pkgs = c('devtools', 'BiocManager', 'rmarkdown', 'optparse'), repos = c('https://cran.ma.imperial.ac.uk/', 'https://www.stats.bris.ac.uk/R/'))"
+    "install.packages(pkgs = c('devtools', 'BiocManager', 'rmarkdown', 'optparse', 'tidyverse' ), repos = c('https://cran.ma.imperial.ac.uk/', 'https://www.stats.bris.ac.uk/R/'))"
 
 
 RUN /usr/bin/R --vanilla -e     \
-    "BiocManager::install(c('DESeq2', 'tximport', 'rtracklayer', 'ComplexHeatmap', 'GenomeInfoDb'))"
+    "BiocManager::install(c('DESeq2', 'tximport', 'rtracklayer', 'ComplexHeatmap', 'GenomeInfoDb', 'ggbio'))"
 
 
 RUN /usr/bin/R --vanilla -e \
@@ -45,3 +45,7 @@ RUN /usr/bin/R --vanilla -e \
 
 ENV  PATH /opt/conda/bin:$PATH
 
+
+
+RUN /usr/bin/R --vanilla -e \
+    "install.packages(pkgs = c('DT', 'ashr' ), repos = c('https://cran.ma.imperial.ac.uk/', 'https://www.stats.bris.ac.uk/R/'))"
