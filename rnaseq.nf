@@ -6,7 +6,7 @@
 
 nextflow.enable.dsl = 2
 
-include { checkParameters; checkKickstartCSV; displayParameters; checkRNAseqSampleSheet  } from "./components/configuration"
+include { checkParameters; checkKickstartCSV; displayParameters; checkRNAseqSampleSheet; checkRNAseqContrastFile  } from "./components/configuration"
 
 // Check all is well with the parameters and the alignment.csv file.
 
@@ -19,6 +19,10 @@ if (!checkKickstartCSV(params))
     exit 1
 }
 if (!checkRNAseqSampleSheet(params))
+{
+    exit 1
+}
+if (!checkRNAseqContrastFile(params))
 {
     exit 1
 }
