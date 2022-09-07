@@ -162,7 +162,9 @@ if(!dir.exists(opts$templateDir)){
   dir.create(opts$templateDir)
 }
 
-
+if( genesToShow == 'NULL' ){
+  genesToShow <- NULL
+}
 
 
 rnaSeqReport(opts)

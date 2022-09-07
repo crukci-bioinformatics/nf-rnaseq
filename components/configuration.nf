@@ -41,36 +41,86 @@ def checkParameters(params)
         }
         if (!containsKey('shortSpecies'))
         {
-            log.error 'Species abbreviation not set. Use --shortSpecies with the abbreviation, eg. "hsa", "mmu".'
+            log.error 'Species abbreviation not set. Use --shortSpecies  to set it, eg. "hsa", "mmu".'
             errors = true
         }
         if (!containsKey('assembly'))
         {
-            log.error 'Genome assembly not set. Use --assembly with the genome version, eg. "GRCh38".'
+            log.error 'Genome assembly not set. Use --assembly  to set it, eg. "GRCh38".'
             errors = true
         }
         if (!containsKey('salmonVersion'))
         {
-            log.error 'salman version not set. Use --salmonVersion with the salmon version, eg. "1.8.0".'
+            log.error 'salman version not set. Use --salmonVersion  to set it, eg. "1.8.0".'
             errors = true
             
         }
         if (!containsKey('fastqDir'))
         {
-            log.error 'fastq folder not set. Use --fastqDir with the fastq folder name, eg. "fastq".'
+            log.error 'fastq folder not set. Use --fastqDir  to set it, eg. "fastq".'
             errors = true
         }
         if (!containsKey('quantOutDir'))
         {
-            log.error 'quantification output folder is not set. use --quantOutDir with output foldername eg. "salmonOut"'
+            log.error 'quantification output folder is not set. use --quantOutDir  to set it, eg. "salmonOut"'
         }
         if (!containsKey('kmerLen'))
         {
-            log.error 'salmon kmer length not set. use --kmerLen with kmer length eg. "31"'
+            log.error 'salmon kmer length not set. use --kmerLen  to set it, eg. "31"'
         }
         if (!containsKey('sampleSheet'))
         {
-            log.error 'RNAseq sample sheet not set. use --sampleSheet with RNAseq sample sheet eg. "samplesheet.csv"'
+            log.error 'RNAseq sample sheet not set. use --sampleSheet  to set it. eg. "samplesheet.csv"'
+        }
+
+        if (!containsKey('projectName'))
+        {
+            log.error 'RNAseq project name not set. use --projectName  to set it, eg. "test_project"'
+        }
+
+        if (!containsKey('contrastFile'))
+        {
+            log.error 'RNAseq contrast file not set. use --contrastFile  to set it, eg. "contrast.csv"'
+        }
+
+        if (!containsKey('design'))
+        {
+            log.error 'RNAseq design not set. use --design to set it, eg. "SampleGroup+Treatment"'
+        }
+
+        if (!containsKey('countsDir'))
+        {
+            log.error 'RNAseq counts directory not set. use --countsDir to set it, eg. "counts"'
+        }
+
+        if (!containsKey('colorFactors'))
+        {
+            log.error 'RNAseq color factors (column names of metadata sheet) not set. use --colorFactors to set it, eg. "SampleGroup,batch"'
+        }
+
+        if (!containsKey('DeOutDir'))
+        {
+            log.error 'RNAseq DE output folder name not set. use --DeOutDir to set it, eg. "DE_analysis"'
+        }
+
+        if (!containsKey('pValCutoff'))
+        {
+            log.error 'RNAseq p-value cut-off not set. use --pValCutoff to set it, eg. "0.05"'
+        }
+
+        if (!containsKey('genesToShow'))
+        {
+            log.error 'RNAseq, gene names to show on plots not set. use --genesToShow to set it, eg. "ESR1"'
+        }
+
+        if (!containsKey('templateDir'))
+        {
+            log.error 'RNAseq,report template directory not set. use --templateDir to set it, eg. "report_dir"'
+        }
+
+        if (!containsKey('reportFile'))
+        {
+            log.error 'RNAseq,report file name not set. use --reportFile to set it, eg. "RNAseqReport.html"'
         }
 
         if (errors)
@@ -120,6 +170,7 @@ def checkParameters(params)
                     {
                         salmonIndex = "${referenceRoot}/${species}/${assembly}/salmon-${salmonVersion}/k${kmerLen}"
                         tx2gene = "${referenceRoot}/${species}/${assembly}/salmon-${salmonVersion}/tx2gene.tsv"
+                        gtfFile = "${referenceRoot}/${species}/${assembly}/annotation/${shortSpecies}.${assembly}.gtf"
                     }
                 }
                 break

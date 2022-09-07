@@ -2,21 +2,21 @@
 
 set -o pipefail
 
-Rscript runRNAseqReport.R \
-    --projectName=!{projectName} \
-    --sampleSheet=!{sampleSheet} \
+Rscript bin/runRNAseqReport.R \
+    --project=!{projectName} \
+    --samplesheet=!{sampleSheet} \
     --genome=!{genome} \
     --assembly=!{assembly} \
-    --quantOutDir==!{quantOutDir} \
+    --quantOut==!{quantOutDir} \
     --tx2geneFile=!{tx2gene} \
     --gtfFile=!{} \
     --contrastFile=!{contrastFile} \
     --design=!{design} \
-    --countsDir=!{} \
-    --colorFactorNames=!{} \
-    --DeOutDir=!{} \
-    --pValCutoff=!{} \
-    --genesToShow=!{} \
-    --templateDir=!{} \
-    --reportFile=!{}
+    --countsDir=!{countsDir} \
+    --factorName=!{colorFactors} \
+    --DeOutDir=!{DeOutDir} \
+    --pValCutoff=!{pValCutoff} \
+    --genesToShow=!{genesToShow} \
+    --templateDir=!{templateDir} \
+    --reportFile=!{reportFile}
 
