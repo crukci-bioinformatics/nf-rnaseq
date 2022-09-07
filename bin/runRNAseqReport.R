@@ -148,4 +148,21 @@ cmdLine <- parse_args(parser, args=commandArgs(trailingOnly=TRUE),
 
 opts <- cmdLine$options
 
+# create required directories
+
+if(!dir.exists(opts$countsDir)){
+  dir.create(opts$countsDir)
+}
+
+if(!dir.exists(opts$DeOutDir)){
+  dir.create(opts$DeOutDir)
+}
+
+if(!dir.exists(opts$templateDir)){
+  dir.create(opts$templateDir)
+}
+
+
+
+
 rnaSeqReport(opts)
