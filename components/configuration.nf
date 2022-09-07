@@ -295,7 +295,7 @@ def checkRNAseqSampleSheet(params)
                 def rowNum = parser.recordNumber + 1
                 if (!record.get('SampleName'))
                 {
-                    log.error "In ${params.sampleSheet} file,  No 'SampleName' file name set on line ${rowNum}."
+                    log.error "In ${params.sampleSheet} file,  No 'SampleName'  name set on line ${rowNum}."
                     ok = false
                 } else {
                     s = record.get('SampleName')
@@ -342,3 +342,67 @@ def checkRNAseqSampleSheet(params)
 
     return ok
 }
+
+
+/* contrast file sanity check
+*/
+def checkRNAseqContrastFile(params)
+{
+    def ok = true
+    try
+    {
+        def driverFile = file(params.contrastFile)
+        driverFile.withReader('UTF-8')
+        {
+            stream ->
+            def parser = CSVParser.parse(stream, CSVFormat.DEFAULT.withHeader())
+            def first = true
+
+            for (record in parser)
+            {
+                if (first)
+                {
+                    if (!record.isMapped('numerator'))
+                    {
+                        log.error "${params.contrastFile} must contain a column 'numerator'."
+                        ok = false
+                    }
+
+                    if (!record.isMapped('denominator'))
+                    {
+                        log.error "${params.contrastFile} must contain a column 'denominator'."
+                        ok = false
+                    }
+
+                    first = false
+                    if (!ok)
+                    {
+                        break
+                    }
+                }
+
+                def rowNum = parser.recordNumber + 1
+                if (!record.get('numerator'))
+                {
+                    log.error "In ${params.contrastFile} file,  No 'numerator'  name set on line ${rowNum}."
+                    ok = false
+                } 
+                
+                if (!record.get('denominator'))
+                {
+                    log.error "In ${params.contrastFile} file,  No 'denominator'  name set on line ${rowNum}."
+                    ok = false
+                } 
+            }
+        }
+    }
+    catch (Exception e)
+    {
+        logException(e)
+        ok = false
+    }
+
+    return ok
+}
+
+
