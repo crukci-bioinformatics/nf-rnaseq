@@ -9,7 +9,7 @@ Rscript bin/runRNAseqReport.R \
     --assembly=!{assembly} \
     --quantOut==!{quantOutDir} \
     --tx2geneFile=!{tx2gene} \
-    --gtfFile=!{} \
+    --gtfFile=!{gtfFile} \
     --contrastFile=!{contrastFile} \
     --design=!{design} \
     --countsDir=!{countsDir} \
