@@ -27,8 +27,6 @@ def checkParameters(params)
             log.error "quantificatio tool not specified. Use --quantTool with 'salmon'."
             errors = true
         }
-
-
         if (!containsKey('endType'))
         {
             log.error "Sequencing method not set. Use --endType with 'se' (single read) or 'pe' (paired end)."
@@ -53,7 +51,6 @@ def checkParameters(params)
         {
             log.error 'salman version not set. Use --salmonVersion  to set it, eg. "1.8.0".'
             errors = true
-            
         }
         if (!containsKey('fastqDir'))
         {
@@ -63,64 +60,77 @@ def checkParameters(params)
         if (!containsKey('quantOutDir'))
         {
             log.error 'quantification output folder is not set. use --quantOutDir  to set it, eg. "salmonOut"'
+            errors = true
         }
         if (!containsKey('kmerLen'))
         {
             log.error 'salmon kmer length not set. use --kmerLen  to set it, eg. "31"'
+            errors = true
         }
         if (!containsKey('sampleSheet'))
         {
             log.error 'RNAseq sample sheet not set. use --sampleSheet  to set it. eg. "samplesheet.csv"'
+            errors = true
         }
 
         if (!containsKey('projectName'))
         {
             log.error 'RNAseq project name not set. use --projectName  to set it, eg. "test_project"'
+            errors = true
         }
 
         if (!containsKey('contrastFile'))
         {
             log.error 'RNAseq contrast file not set. use --contrastFile  to set it, eg. "contrast.csv"'
+            errors = true
         }
 
         if (!containsKey('design'))
         {
             log.error 'RNAseq design not set. use --design to set it, eg. "SampleGroup+Treatment"'
+            errors = true
         }
 
         if (!containsKey('countsDir'))
         {
             log.error 'RNAseq counts directory not set. use --countsDir to set it, eg. "counts"'
+            errors = true
         }
 
         if (!containsKey('colorFactors'))
         {
             log.error 'RNAseq color factors (column names of metadata sheet) not set. use --colorFactors to set it, eg. "SampleGroup,batch"'
+            errors = true
         }
 
         if (!containsKey('DeOutDir'))
         {
             log.error 'RNAseq DE output folder name not set. use --DeOutDir to set it, eg. "DE_analysis"'
+            errors = true
         }
 
         if (!containsKey('pValCutoff'))
         {
             log.error 'RNAseq p-value cut-off not set. use --pValCutoff to set it, eg. "0.05"'
+            errors = true
         }
 
         if (!containsKey('genesToShow'))
         {
             log.error 'RNAseq, gene names to show on plots not set. use --genesToShow to set it, eg. "ESR1"'
+            errors = true
         }
 
         if (!containsKey('templateDir'))
         {
             log.error 'RNAseq,report template directory not set. use --templateDir to set it, eg. "report_dir"'
+            errors = true
         }
 
         if (!containsKey('reportFile'))
         {
             log.error 'RNAseq,report file name not set. use --reportFile to set it, eg. "RNAseqReport.html"'
+            errors = true
         }
 
         if (errors)
@@ -422,6 +432,12 @@ def checkRNAseqContrastFile(params)
                     if (!record.isMapped('denominator'))
                     {
                         log.error "${params.contrastFile} must contain a column 'denominator'."
+                        ok = false
+                    }
+
+                    if ( !record.isMapped('numerator') && !record.isMapped('denominator') )
+                    {
+                        log.error "${params.contrastFile} must contain 'numerator' and  'denominator' columns."
                         ok = false
                     }
 
