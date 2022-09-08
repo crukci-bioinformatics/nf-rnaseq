@@ -53,6 +53,9 @@ displayParameters(params)
  */
 workflow
 {
+    report_ch = channel
+
+    
     csv_channel = channel
         .fromPath(params.kickstartCSV)
         .splitCsv(header: true, quote: '"', strip: true)
