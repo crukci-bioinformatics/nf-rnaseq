@@ -1,0 +1,470 @@
+---
+title: "RNA-Seq Report: Project **`r projectName`**"
+author: "Bioinformatics Core"
+date: "`r format(Sys.time(), '%a %d %b %Y')`"
+output:
+  html_document:
+    theme: cerulean
+    highlight: espresso
+    toc: yes
+    toc_float: yes
+    smooth_scroll: yes
+    code_folding: hide
+---
+
+
+
+```{r setup, include=FALSE}
+# load libraries
+suppressPackageStartupMessages(library(rnaseqRcode) )# Analysis R package
+#devtools::load_all()
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(DT))
+suppressPackageStartupMessages(library(RColorBrewer))
+suppressPackageStartupMessages(library(DESeq2))
+suppressPackageStartupMessages(library(assertthat))
+# knitr global options
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning = FALSE, cache = FALSE)
+```
+
+
+```{r def_functions}
+catHeader <- function(text = "", level = 3, is_tabset=FALSE) {
+  
+  if(is_tabset){
+    cat(paste0("\n\n", 
+               paste(rep("#", level), collapse = ""), 
+               " ", text,' {.tabset}', "\n"))
+    
+  }else{
+    cat(paste0("\n\n", 
+               paste(rep("#", level), collapse = ""), 
+               " ", text, "\n"))
+  }
+}
+
+```
+
+
+
+```{r variable_substitute}
+
+pValCutoff <- as.numeric(pValCutoff)
+```
+
+## Introduction  
+
+* This report summarizes a differential gene expression analysis of the
+**`r projectName`** project.
+* Genome: **`r genome`**  
+* Assembly: **`r assembly`**
+* Design: **`r design`**
+
+
+```{r def_vars} 
+# load data
+s_sheet <- read_csv(samplesheet, progress=FALSE, 
+                   show_col_types = FALSE) %>% 
+  arrange(SampleGroup)
+
+tx2gene <- read_tsv(tx2geneFile, show_col_types = FALSE)
+
+gtf <- loadGTF(gtfFile = gtfFile)
+
+contTab <- read_csv(contrastFile, show_col_types = FALSE)
+```
+
+## Sample information {.tabset}
+
+### Sample metadata 
+
+```{r sample_metadata}
+groupNames <-  unique(s_sheet$SampleGroup)
+noGroups <- length(groupNames)
+colPals = brewer.pal.info[brewer.pal.info$colorblind, ] %>% 
+  .[c('Dark2', 'Paired'),]
+
+colVector = unlist(mapply(brewer.pal, colPals$maxcolors,
+                           rownames(colPals)))
+
+if (noGroups < length(colVector) ){
+  groupColors <- sample(colVector, noGroups, replace = FALSE)
+}else{
+  groupColors <- sample(colVector, noGroups, replace = TRUE)
+}
+
+s_sheet %>% 
+  arrange('SampleGroup') %>% 
+  datatable(style='bootstrap') 
+```
+The following table contains meta data that was provided to us.  
+
+
+###  Replicates per sample group
+
+```{r sampleGroupTab}
+s_sheet %>% 
+  select(SampleGroup) %>% 
+  group_by(SampleGroup) %>% 
+  summarise(Replicates=n()) %>% 
+  datatable()
+```
+
+The above table shows the number of replicates for each sample group.
+
+
+```{r load_data}
+txi <- importSampleTxiAndSaveRds(s_sheet = s_sheet, quantOut = quantOut, 
+                          quantTool = 'salmon', tx2gene = tx2gene )
+rawCounts <- txi$counts
+mode(rawCounts) <- 'integer'
+rawCounts <- rawCounts[rowSums(rawCounts) > 0, ]
+```
+
+# QC 
+
+##  QC on reads per sample {.tabset}   
+
+### Reads / sample table
+
+```{r reads_per_sample_tab}
+readsPerSample <- getReadCountsFromSalmonLogs(s_sheet = s_sheet, 
+                                              quantOut = quantOut) %>%
+  mutate(fragments = fragments / 1000000) %>% 
+  mutate(fragments = round(fragments, digits = 2))
+  
+readsPerSample %>% 
+  datatable(caption = 'Reads per sample (million)') 
+
+```
+
+The above table shows the number of reads or read pairs or fragments (millions) for each sample. For standard differential expression studies, we recommend at least **20 million** reads.
+
+<br><br><br><br>
+
+
+### barplot: Reads / sample 
+
+```{r reads_per_sample_bp}
+readsPerSampleBarPlot(readCounts = readsPerSample, s_sheet = s_sheet)
+```
+
+The barplot above shows the number of reads per sample. The X-axis shows the number of reads or read pairs or fragments in million, and the Y-axis shows the sample name. The yellow line shows the recommended number of reads i.e  **20 million** reads.
+
+<br><br><br><br>
+
+
+### boxplot: Reads / sample group
+
+```{r reads_per_group_boxplot}
+readsPerGroupBoxplot(s_sheet = s_sheet, readCounts = readsPerSample)
+```
+
+In the above plot each sample group is represented by a boxplot of reads per sample. The X-axis shows the sample group and the Y-axis shows the number of reads. Dots represent samples. 
+
+<br><br><br><br>
+
+
+## QC on raw count matrix  {.tabset}
+
+### density plot: reads / sample group
+
+```{r reads_per_sample_dens_plot}
+countsDensityPlot(s_sheet = s_sheet, countsData = rawCounts)
+```
+
+The plot above shows log2 transformed counts on the X-axis and density on the Y-axis. Low counts are indicated by density on the left side of the plot, and zero-inflated data are indicated by extreme left shifts. If a sample shows both low counts and/or zero-inflated counts, further investigation may be needed. 
+
+<br><br><br><br>
+
+
+
+### Ribosomal read fraction
+
+```{r robo_fraction_plot}
+riboFractionPlot(countsData = rawCounts, gtf = gtf, s_sheet = s_sheet)
+```
+
+The above plot shows the fraction of counts from ribosomal and nonribosomal genes. A sample name appears on the X-axis, and a percentage of counts appears on the Y-axis. In ideal circumstances, the ribosomal read fraction should be much lower than the nonribosomal fraction. 
+
+<br><br><br><br>
+
+### counts on gene biotype  
+
+```{r gene_biotype_plot}
+plotGeneBiotypes(countsData = rawCounts, gtf=gtf, s_sheet = s_sheet)
+```
+The plot above shows the percent of the major gene biotypes for each sample. We should expect this plot to show almost horizontal lines in a high quality data set, with proteins coding genes taking up a greater fraction of reads.
+
+<br><br><br><br>
+
+
+
+### Library complexity
+
+```{r library_complexity_plot}
+getLibraryComplexityPlot(countsData = rawCounts, s_sheet = s_sheet)
+```
+
+The above plot shows the complexity of a sample library. Each sample is shown what fraction of counts is accounted for by what fraction of genes. A sample with a different library complexity than the rest may be considered low quality. Each line represents a sample, and  samples are color-coded by sample group.
+
+<br><br><br><br>
+
+### Gene detection 
+
+```{r gene_detec_plot}
+getGeneDetctionPlot(countsData = rawCounts, s_sheet = s_sheet)
+```
+
+The above plot shows the number of genes detected at various thresholds for a given sample. Samples are color-coded by sample group and each line represents a sample. The 5 counts on the X-axis indicate the number of genes detected with 5 or more reads on the Y-axis. 
+
+<br><br><br><br>
+
+## QC: Unsupervised clustering {.tabset}
+
+### PCA Analysis {.tabset} 
+
+#### PC1 and PC2
+
+```{r PC1_and_PC2_plot}
+trnCounts <- transformCounts(rawCounts = rawCounts, countsCutOff = 10, FUN = vst)
+getPcaPlot(countsDat = trnCounts, 
+           s_sheet = s_sheet,
+           pcaColFactor = 'SampleGroup',
+           PCx = 1,
+           PCy = 2)
+```
+
+#### PC1 and PC3
+
+```{r PC1_and_PC3_plot}
+getPcaPlot(countsDat = trnCounts, 
+           s_sheet = s_sheet,
+           pcaColFactor = 'SampleGroup',
+           PCx = 1,
+           PCy = 3)
+```
+
+
+#### PC2 and PC3
+
+```{r PC2_and_PC3_plot}
+getPcaPlot(countsDat = trnCounts, 
+           s_sheet = s_sheet,
+           pcaColFactor = 'SampleGroup',
+           PCx = 2,
+           PCy = 3)
+```
+
+#### 3D PCA plot 
+
+```{r 3dPCA_plot}
+get3dPCAplot(countsDat = trnCounts, s_sheet = s_sheet, pcaColFactor = 'SampleGroup')
+```
+
+Above PCA plot shows the first two principal components of the variance-stabilizing-transformed raw counts. Each circle is a sample and samples are color-coded by sample group.
+
+
+<br><br><br><br>
+
+#### PC loadings plot  
+
+```{r pc_loadings_plot}
+getPcaLoadingsPlot(countsData=trnCounts, s_sheet = s_sheet,
+                   genesToShow = NULL, gtf = gtf, topN = 10)
+```
+
+Above PC loadings plots shows the top genes driving a PC1 axis. Top genes with highest loadings are labeled.
+
+<br><br><br><br>
+
+
+### Hierarchical clustering 
+
+```{r hclust_plot}
+hierarchicalClustPlot(countsDat=trnCounts, 
+                      s_sheet = s_sheet, 
+                      colorByCol = 'SampleGroup' )
+```
+
+Above unsupervised hierarchical clustering plot of the variance-stabilizing-transformed raw counts showing clustering by euclidean distance. Samples are color-coded by sample group. Samples are color-coded by sample group.
+
+<br><br><br><br>
+
+
+### Correlogram 
+
+```{r correlogram_plot}
+correlationPlot(countsMat = trnCounts, s_sheet = s_sheet)
+```
+
+The plot above shows the pairwise correlations between all samples. In intragroup correlations, we expect higher coefficients than in intergroup correlations.
+
+<br><br><br><br>
+
+
+# DE analysis
+
+```{r DE_analysis}
+design <- checkAndCreateCorrectDesignString(s_sheet = s_sheet, 
+                                            design = design)
+
+dds <- createDdsAndDESeq(txi=txi, s_sheet = s_sheet, design = design )
+
+saveCounts(dds = dds, txi = txi, countsDir = countsDir, gtf = gtf )
+```
+
+## DESeq2 QC plots {.tabset}
+
+### Normalisation plots {.tabset}
+
+#### Raw counts distribution
+
+```{r raw_counts_dist_plot}
+normPlots <- normFactorsBoxplot(dds=dds)
+print(normPlots$pRawCounts)
+```
+
+#### Normalised counts distribution
+
+```{r norm_counts_dist_plot}
+print(normPlots$pNormCounts)
+```
+
+The plots above show the raw and normalized data. Normalization factors are shown in the top plot, log2 transformed raw counts in the middle, and normalized counts in the bottom plot.
+
+<br><br><br><br>
+
+### Dispersion estimates plot
+
+```{r dispersion_plot}
+plotDispEsts(dds)
+```
+
+Above plot shows the per-gene dispersion estimates together with the fitted mean-dispersion relationship.
+
+<br><br><br><br>
+
+
+### heat-map with top variable genes 
+
+```{r heatmap_plot}
+getHeatmap(dds=dds, topN=500, annoGroup = c('SampleGroup'))
+```
+
+The above plot shows a heatmap of the top 500 highly variable genes.
+
+<br><br><br><br>
+
+## Differential testing {.tabset}
+
+```{r de_testing, results = "asis"}
+contNames <- c()
+sigUpReg <- c()
+sigDownReg <- c()
+
+for( i in 1:nrow(contTab)){
+  
+  numerator <- contTab$numerator[i]
+  denominator <- contTab$denominator[i]
+  contName <- str_c( numerator, 'vs', denominator, sep = ' ')
+  
+  catHeader(text = contName, level = 3, is_tabset = TRUE)
+  
+  res <- writeAndPlotDEResults(dds = dds,
+                      factorName = factorName,
+                      numerator=numerator,
+                      denominator=denominator,
+                      gtf = gtf,
+                      DeOutDir = DeOutDir,
+                      pValCutoff = 0.05
+                      )
+  
+  contNames <- c(contNames, contName)
+  sigUpReg <- c(sigUpReg, 
+                sum(res$log2FoldChange > 0 & 
+                      res$padj < pValCutoff, na.rm=TRUE))
+  sigDownReg <- c(sigDownReg,
+                  sum(res$log2FoldChange < 0 & 
+                        res$padj < pValCutoff, na.rm=TRUE))
+  
+  # MA plot
+  catHeader(text = 'MA plot', level = 4)
+  p_ma <- getMAplot(res = res, numerator = numerator,
+          denominator=denominator,
+          topN=20, genesToShow = genesToShow)
+  
+  print(p_ma)
+  
+  # volcano plot
+  catHeader(text = 'volcano plot', level = 4)
+  
+  p_vol <- getVolcanoPlot(res=res, numerator = numerator,
+               denominator = denominator,
+               topN = 20, genesToShow = genesToShow,
+               pValCutoff = pValCutoff)
+  
+  print(p_vol)
+  
+  # p-value distribution plot
+  catHeader(text = 'p-value distribution plot', level = 4)
+  
+  p_pval <- getPvalDistriPlot(res = res,
+                  numerator = numerator,
+                  denominator=denominator,
+                  pValCutoff = pValCutoff)
+  
+  print(p_pval)
+  
+  # Karyogram plot
+  catHeader(text = 'Karyogram plot', level = 4)
+  
+  kPlot <- getKaryogramPlot(dds=dds,
+                 numerator = numerator,
+                 denominator = denominator,
+                 factorName = factorName,gtf = gtf,
+                 pValCutoff = pValCutoff,
+                 genome = genome
+
+                  )
+  
+  print(kPlot)
+  
+  # gene counts plot
+  catHeader(text = 'Gene counts plot', level = 4)
+  
+  geneCtsPlot <- getGeneCountsPlot(dds=dds,
+                  numerator = numerator, 
+                  denominator = denominator,
+                  factorName = factorName,
+                  gtf=gtf,
+                  pValCutoff=pValCutoff,
+                  topN=10, 
+                  genesToShow=genesToShow)
+  print(geneCtsPlot)
+
+}
+
+deSumTab <- tibble(contrast=contNames, 
+                   sigUpReg=sigUpReg, 
+                   sigDownReg=sigDownReg,
+                   totalSigReg= (sigUpReg + sigDownReg)
+                   )
+```
+
+
+## DE summary table 
+
+```{r DE_sum_tab}
+
+deSumTab %>% 
+  datatable(style='bootstrap', caption = 'Significantly regulated genes for each contrast ') %>% 
+  formatStyle(
+    columns = 'contrast',
+    target = 'cell',
+    color= 'black',
+    ontWeight='bold'
+  )
+
+```
+

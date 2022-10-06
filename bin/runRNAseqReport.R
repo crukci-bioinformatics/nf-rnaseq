@@ -2,6 +2,7 @@ suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(assertthat))
 suppressPackageStartupMessages(library(rmarkdown))
+
 ##################### START OF FUNCTIONS #######################################
 # parse command line options
 mkOptParser <- function() {
@@ -72,11 +73,9 @@ getUserPlayableRmd <- function(rawRmd, varFile, titleName) {
   write_lines(x=allLines, file = userRmdFile)
 }
 
-
-rnaSeqReport <- function(opts){
+rnaSeqReport <- function(opts) {
 
   genome = opts$genome
-
   varList <- list(
     projectName = opts$project,
     samplesheet = opts$samplesheet,
@@ -116,22 +115,23 @@ rnaSeqReport <- function(opts){
   reportTemplate = system.file("extdata/rnaseqReport.Rmd",package = "rnaseqRcode")
   assert_that(reportTemplate != "",msg = "reportTemplate missing")
 
-  reportWritableTemplate <- file.path(templateDir,basename(reportTemplate))
-  file.copy(reportTemplate,reportWritableTemplate, overwrite = TRUE)
+  #reportWritableTemplate <- file.path(templateDir, basename(reportTemplate))
+  #file.copy(reportTemplate,reportWritableTemplate, overwrite = TRUE)
+  #tempDir <- tempdir()
 
-  tempDir <- tempdir()
-  render(reportWritableTemplate,
+  render("rnaseqReport.Rmd",
          output_file = reportFile,
-         intermediates_dir = tempDir,
-         knit_root_dir = tempDir,
+         #intermediates_dir = tempDir,
+         #knit_root_dir = tempDir,
          output_dir = dirname(reportFile),
          quiet = FALSE)
 
-  varFile <- str_c(templateDir, 'variables.txt', sep='/')
+  #varFile <- str_c(templateDir, 'variables.txt', sep='/')
+  varFile <- 'variables.txt'
 
   writeVariablesForRmd(varList = varList, outFile=varFile )
 
-  getUserPlayableRmd(rawRmd = reportWritableTemplate,
+  getUserPlayableRmd(rawRmd = "rnaseqReport.Rmd",
                      varFile = varFile,
                      titleName = projectName)
 }
@@ -162,9 +162,31 @@ if(!dir.exists(opts$templateDir)){
   dir.create(opts$templateDir)
 }
 
-if( genesToShow == 'NULL' ){
-  genesToShow <- NULL
+if( opts$genesToShow == 'NULL' ){
+  opts$genesToShow <- NULL
 }
 
-
+# run th e report 
 rnaSeqReport(opts)
+
+# copy rmd and report file to templateDir
+file.copy(from='rnaseqReport.Rmd',
+            to=str_c(opts$templateDir, "rnaseqReport.Rmd", sep='/'),
+             overwrite=TRUE)
+
+file.copy(from='userPlayable_rnaseqReport.Rmd',
+            to=str_c(opts$templateDir, "userPlayable_rnaseqReport.Rmd", sep='/'), 
+            overwrite=TRUE)
+
+#file.copy(from=opts$reportFile,
+#            to=str_c(opts$templateDir, opts$reportFile, sep='/'), 
+#            overwrite=TRUE)
+
+file.copy(from="variables.txt",
+            to=str_c(opts$templateDir, "variables.txt", sep='/'), 
+            overwrite=TRUE)
+
+
+
+
+
