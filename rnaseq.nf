@@ -94,9 +94,6 @@ workflow
      collect
 
     // add salmon outputs to report channel
-    report_ch
-        .combine(salmon_out_ch)
-
     // run RNAseq report process
-    RNASEQREPORT(report_ch)
+    RNASEQREPORT(report_ch.combine(salmon_out_ch))
 }
