@@ -17,7 +17,7 @@ process SALMON
     maxRetries 2
     
     input:
-        tuple val(sample_name),  file(r1_fqs), file(r2_fqs)
+        tuple val(sample_name),  file(r1_fqs), file(r2_fqs), path(index)
     
     output:
         path "${sample_name}"

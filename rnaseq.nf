@@ -89,8 +89,9 @@ workflow
         .combine( Channel.fromPath("${params.rScript}") )
         .combine( Channel.fromPath("${params.rmdFile}") )
 
+    // add index path to csv channel
     // run salmon process and collect all outputs
-    salmon_out_ch = SALMON(csv_channel) |
+    salmon_out_ch = SALMON( csv_channel.combine( Channel.fromPath("${params.salmonIndex}")) ) |
      collect
 
     // add salmon outputs to report channel
