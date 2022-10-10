@@ -112,21 +112,12 @@ rnaSeqReport <- function(opts) {
   templateDir = opts$templateDir
   reportFile = opts$reportFile
 
-  #reportTemplate = system.file("extdata/rnaseqReport.Rmd",package = "rnaseqRcode")
-  #assert_that(reportTemplate != "",msg = "reportTemplate missing")
-
-  #reportWritableTemplate <- file.path(templateDir, basename(reportTemplate))
-  #file.copy(reportTemplate,reportWritableTemplate, overwrite = TRUE)
-  #tempDir <- tempdir()
 
   render("rnaseqReport.Rmd",
          output_file = reportFile,
-         #intermediates_dir = tempDir,
-         #knit_root_dir = tempDir,
          output_dir = dirname(reportFile),
          quiet = FALSE)
 
-  #varFile <- str_c(templateDir, 'variables.txt', sep='/')
   varFile <- 'variables.txt'
 
   writeVariablesForRmd(varList = varList, outFile=varFile )
@@ -136,7 +127,6 @@ rnaSeqReport <- function(opts) {
                      titleName = projectName)
 }
 ##################### END OF FUNCTIONS #######################################
-
 # Rscript runRNAseqReport.R --samplesheet=/Users/chilam01/Desktop/rnaseqRcode/data/samplesheet_corrected.csv --project=test_project --genome=Mus_musculus --assembly=GRCm38 --quantOut=/Users/chilam01/Desktop/rnaseqRcode/data/quantOut --tx2geneFile=/Users/chilam01/Desktop/rnaseqRcode/data/references/tx2gene.tsv --gtfFile="/Users/chilam01/Desktop/rnaseqRcode/data/references/mmu.GRCm38.gtf" --contrastFile="/Users/chilam01/Desktop/rnaseqRcode/data/contrasts.csv" --design=SampleGroup --countsDir="/Users/chilam01/Desktop/rnaseqRcode/data/counts" --factorName=SampleGroup --DeOutDir=/Users/chilam01/Desktop/rnaseqRcode/data/DEAnalysis/test1  --pValCutoff=0.05 --genesToShow=ESR1 --templateDir=/Users/chilam01/Desktop/rnaseqRcode/temp --reportFile=/Users/chilam01/Desktop/rnaseqRcode/temp/xxx.html
 options(stringsAsFactors=FALSE)
 # get arguments
@@ -149,7 +139,6 @@ cmdLine <- parse_args(parser, args=commandArgs(trailingOnly=TRUE),
 opts <- cmdLine$options
 
 # create required directories
-
 if(!dir.exists(opts$countsDir)){
   dir.create(opts$countsDir)
 }
@@ -178,15 +167,8 @@ file.copy(from='userPlayable_rnaseqReport.Rmd',
             to=str_c(opts$templateDir, "userPlayable_rnaseqReport.Rmd", sep='/'), 
             overwrite=TRUE)
 
-#file.copy(from=opts$reportFile,
-#            to=str_c(opts$templateDir, opts$reportFile, sep='/'), 
-#            overwrite=TRUE)
 
 file.copy(from="variables.txt",
             to=str_c(opts$templateDir, "variables.txt", sep='/'), 
             overwrite=TRUE)
-
-
-
-
 
