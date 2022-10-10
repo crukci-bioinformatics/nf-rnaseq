@@ -1,5 +1,5 @@
 ---
-title: "RNA-Seq Report: Project **`r projectName`**"
+title: 'RNA-Seq Report: Project **`r projectName`**'
 author: "Bioinformatics Core"
 date: "`r format(Sys.time(), '%a %d %b %Y')`"
 output:
@@ -15,9 +15,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-# load libraries
-suppressPackageStartupMessages(library(rnaseqRcode) )# Analysis R package
-#devtools::load_all()
+suppressPackageStartupMessages(library(rnaseqRcode) )
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(DT))
 suppressPackageStartupMessages(library(RColorBrewer))
@@ -46,21 +44,27 @@ catHeader <- function(text = "", level = 3, is_tabset=FALSE) {
 ```
 
 
-
 ```{r variable_substitute}
-
 pValCutoff <- as.numeric(pValCutoff)
+genome_name <- str_replace(genome, "_", " ") %>% 
+  str_to_sentence()
 ```
 
-## Introduction  
+# Introduction  
 
-* This report summarizes a differential gene expression analysis of the
-**`r projectName`** project.
-* Genome: **`r genome`**  
+* This report summarizes a differential gene expression analysis of the **`r projectName`** project.
+* Genome: **`r genome_name`**  
 * Assembly: **`r assembly`**
 * Design: **`r design`**
 
+# Pipeline Overview
 
+* The pipeline has many steps, but the major ones are:
+  * Quantify the expression of transcripts using RNA-seq data using Salmon tool. 
+  * Count number of reads assigned to genes.
+  * Carry out the differential expression analysis.
+  * Generate a report describing the results.
+  
 ```{r def_vars} 
 # load data
 s_sheet <- read_csv(samplesheet, progress=FALSE, 
@@ -74,9 +78,9 @@ gtf <- loadGTF(gtfFile = gtfFile)
 contTab <- read_csv(contrastFile, show_col_types = FALSE)
 ```
 
-## Sample information {.tabset}
+# Sample information {.tabset}
 
-### Sample metadata 
+## Sample metadata 
 
 ```{r sample_metadata}
 groupNames <-  unique(s_sheet$SampleGroup)
@@ -97,10 +101,10 @@ s_sheet %>%
   arrange('SampleGroup') %>% 
   datatable(style='bootstrap') 
 ```
-The following table contains meta data that was provided to us.  
+ 
+Above table shows samples included in this analysis.
 
-
-###  Replicates per sample group
+##  Replicates per sample group
 
 ```{r sampleGroupTab}
 s_sheet %>% 
@@ -110,8 +114,7 @@ s_sheet %>%
   datatable()
 ```
 
-The above table shows the number of replicates for each sample group.
-
+Above table shows the number of replicates for each sample group.
 
 ```{r load_data}
 txi <- importSampleTxiAndSaveRds(s_sheet = s_sheet, quantOut = quantOut, 
@@ -121,7 +124,10 @@ mode(rawCounts) <- 'integer'
 rawCounts <- rawCounts[rowSums(rawCounts) > 0, ]
 ```
 
-# QC 
+# Quality Control (QC)
+
+QC section lists some basic quality control numbers: how many reads per sample and how
+many were assigned to specific features, i.e. genes are included in the analysis.
 
 ##  QC on reads per sample {.tabset}   
 
@@ -149,7 +155,7 @@ The above table shows the number of reads or read pairs or fragments (millions) 
 readsPerSampleBarPlot(readCounts = readsPerSample, s_sheet = s_sheet)
 ```
 
-The barplot above shows the number of reads per sample. The X-axis shows the number of reads or read pairs or fragments in million, and the Y-axis shows the sample name. The yellow line shows the recommended number of reads i.e  **20 million** reads.
+The barplot above shows the number of reads per sample. The X-axis shows the number of reads or read pairs or fragments in million, and the Y-axis shows the sample name. The vertical black line shows the recommended number of reads i.e  **20 million** reads. Samples are color coded on sample group.
 
 <br><br><br><br>
 
@@ -160,10 +166,9 @@ The barplot above shows the number of reads per sample. The X-axis shows the num
 readsPerGroupBoxplot(s_sheet = s_sheet, readCounts = readsPerSample)
 ```
 
-In the above plot each sample group is represented by a boxplot of reads per sample. The X-axis shows the sample group and the Y-axis shows the number of reads. Dots represent samples. 
+Above plot each sample group is represented by a boxplot of reads per sample. The X-axis shows the sample group and the Y-axis shows the number of reads. Dots represent samples. 
 
-<br><br><br><br>
-
+<br><br><br>
 
 ## QC on raw count matrix  {.tabset}
 
@@ -173,7 +178,7 @@ In the above plot each sample group is represented by a boxplot of reads per sam
 countsDensityPlot(s_sheet = s_sheet, countsData = rawCounts)
 ```
 
-The plot above shows log2 transformed counts on the X-axis and density on the Y-axis. Low counts are indicated by density on the left side of the plot, and zero-inflated data are indicated by extreme left shifts. If a sample shows both low counts and/or zero-inflated counts, further investigation may be needed. 
+Above plot above shows log2 transformed counts on the X-axis and density on the Y-axis. Low counts are indicated by density on the left side of the plot, and zero-inflated data are indicated by extreme left shifts. If a sample shows both low counts and/or zero-inflated counts, further investigation may be needed. 
 
 <br><br><br><br>
 
@@ -185,7 +190,7 @@ The plot above shows log2 transformed counts on the X-axis and density on the Y-
 riboFractionPlot(countsData = rawCounts, gtf = gtf, s_sheet = s_sheet)
 ```
 
-The above plot shows the fraction of counts from ribosomal and nonribosomal genes. A sample name appears on the X-axis, and a percentage of counts appears on the Y-axis. In ideal circumstances, the ribosomal read fraction should be much lower than the nonribosomal fraction. 
+Above plot shows the fraction of counts from ribosomal and nonribosomal genes. A sample name appears on the X-axis, and a percentage of counts appears on the Y-axis. In ideal circumstances, the ribosomal read fraction should be much lower than the nonribosomal fraction. 
 
 <br><br><br><br>
 
@@ -194,11 +199,24 @@ The above plot shows the fraction of counts from ribosomal and nonribosomal gene
 ```{r gene_biotype_plot}
 plotGeneBiotypes(countsData = rawCounts, gtf=gtf, s_sheet = s_sheet)
 ```
-The plot above shows the percent of the major gene biotypes for each sample. We should expect this plot to show almost horizontal lines in a high quality data set, with proteins coding genes taking up a greater fraction of reads.
+
+
+Above plot above shows the percent of the major gene biotypes for each sample. We should expect this plot to show almost horizontal lines in a high quality data set, with proteins coding genes taking up a greater fraction of reads.
+
+* Genes are classifies into ten different groups:
+  * protein coding: All protein codeing genes
+  * pseudogene: All pseudogenes
+  * mtRNA: Mt rRNA and  Mt tRNA genes 
+  * smallRNA: miRNA, scRNA, snRNA, snoRNA, sRNA, and scaRNA
+  * otherType: TEC, sense overlapping, antisense, sense intronic, processed transcript, misc RNA, and  ribozyme genes
+  * IG/TR gene: immunoglobulin (IG) and T cell receptor (TR) genes
+  * lncRNA: Long noncoding RNAs (lncRNAs)
+  * rRNA: ribosomal RNA genes
+  * vault RNA: Vault RNA genes
+  * Y RNA: Y RNA genes
+
 
 <br><br><br><br>
-
-
 
 ### Library complexity
 
@@ -206,7 +224,7 @@ The plot above shows the percent of the major gene biotypes for each sample. We 
 getLibraryComplexityPlot(countsData = rawCounts, s_sheet = s_sheet)
 ```
 
-The above plot shows the complexity of a sample library. Each sample is shown what fraction of counts is accounted for by what fraction of genes. A sample with a different library complexity than the rest may be considered low quality. Each line represents a sample, and  samples are color-coded by sample group.
+Above plot shows the complexity of a sample library. Each sample is shown what fraction of counts is accounted for by what fraction of genes. A sample with a different library complexity than the rest may be considered low quality. Each line represents a sample, and  samples are color-coded by sample group.
 
 <br><br><br><br>
 
@@ -216,11 +234,13 @@ The above plot shows the complexity of a sample library. Each sample is shown wh
 getGeneDetctionPlot(countsData = rawCounts, s_sheet = s_sheet)
 ```
 
-The above plot shows the number of genes detected at various thresholds for a given sample. Samples are color-coded by sample group and each line represents a sample. The 5 counts on the X-axis indicate the number of genes detected with 5 or more reads on the Y-axis. 
+Above plot shows the number of genes detected at various thresholds for a given sample. Samples are color-coded by sample group and each line represents a sample. The 5 counts on the X-axis indicate the number of genes detected with 5 or more reads on the Y-axis. 
 
 <br><br><br><br>
 
 ## QC: Unsupervised clustering {.tabset}
+
+Unsupervised clustering shows the relationship between samples. This section presents Principal component analysis (PCA), Hierarchical clustering and correlation plots.
 
 ### PCA Analysis {.tabset} 
 
@@ -235,6 +255,8 @@ getPcaPlot(countsDat = trnCounts,
            PCy = 2)
 ```
 
+Above PCA plot show the first two principal components PC1 and PC2 of the variance-stabilizing-transformed (VST) raw counts. The plots are colored according to selected factors from the sample sheet.
+
 #### PC1 and PC3
 
 ```{r PC1_and_PC3_plot}
@@ -245,6 +267,7 @@ getPcaPlot(countsDat = trnCounts,
            PCy = 3)
 ```
 
+Above PCA plot show the two principal components PC1 and PC3 of the variance-stabilizing-transformed (VST) raw counts. The plots are colored according to selected factors from the sample sheet.
 
 #### PC2 and PC3
 
@@ -256,14 +279,15 @@ getPcaPlot(countsDat = trnCounts,
            PCy = 3)
 ```
 
+Above PCA plot show the two principal components PC2 and PC3 of the variance-stabilizing-transformed (VST) raw counts. The plots are colored according to selected factors from the sample sheet.
+
 #### 3D PCA plot 
 
 ```{r 3dPCA_plot}
 get3dPCAplot(countsDat = trnCounts, s_sheet = s_sheet, pcaColFactor = 'SampleGroup')
 ```
 
-Above PCA plot shows the first two principal components of the variance-stabilizing-transformed raw counts. Each circle is a sample and samples are color-coded by sample group.
-
+Above PCA plot show the first three principal components PC1, PC2 and PC3 of the variance-stabilizing-transformed (VST) raw counts. The plots are colored according to selected factors from the sample sheet.
 
 <br><br><br><br>
 
@@ -278,7 +302,6 @@ Above PC loadings plots shows the top genes driving a PC1 axis. Top genes with h
 
 <br><br><br><br>
 
-
 ### Hierarchical clustering 
 
 ```{r hclust_plot}
@@ -287,10 +310,9 @@ hierarchicalClustPlot(countsDat=trnCounts,
                       colorByCol = 'SampleGroup' )
 ```
 
-Above unsupervised hierarchical clustering plot of the variance-stabilizing-transformed raw counts showing clustering by euclidean distance. Samples are color-coded by sample group. Samples are color-coded by sample group.
+Above unsupervised hierarchical clustering plot of the variance-stabilizing-transformed raw counts showing clustering by euclidean distance. Samples are color-coded by sample group.
 
 <br><br><br><br>
-
 
 ### Correlogram 
 
@@ -298,7 +320,7 @@ Above unsupervised hierarchical clustering plot of the variance-stabilizing-tran
 correlationPlot(countsMat = trnCounts, s_sheet = s_sheet)
 ```
 
-The plot above shows the pairwise correlations between all samples. In intragroup correlations, we expect higher coefficients than in intergroup correlations.
+Above plot above shows the pairwise correlations between all samples. In intragroup correlations, we expect higher coefficients than in inter group correlations. The samples are clustered using hierarchical clustering. 
 
 <br><br><br><br>
 
@@ -316,6 +338,9 @@ saveCounts(dds = dds, txi = txi, countsDir = countsDir, gtf = gtf )
 
 ## DESeq2 QC plots {.tabset}
 
+<br><br>
+[DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) package is used for differential expression analysis.
+
 ### Normalisation plots {.tabset}
 
 #### Raw counts distribution
@@ -325,13 +350,17 @@ normPlots <- normFactorsBoxplot(dds=dds)
 print(normPlots$pRawCounts)
 ```
 
+Above plots above show the raw counts distribution. Counts are log2 transformed. Each box-plot reprasents one sample. Samples are color coded by sample group.
+
+
 #### Normalised counts distribution
 
 ```{r norm_counts_dist_plot}
 print(normPlots$pNormCounts)
 ```
 
-The plots above show the raw and normalized data. Normalization factors are shown in the top plot, log2 transformed raw counts in the middle, and normalized counts in the bottom plot.
+The plot above shows the normalized counts distribution. Counts are log2 transformed. Each box-plot reprasents one sample. Samples are color coded by sample group.
+
 
 <br><br><br><br>
 
@@ -341,10 +370,10 @@ The plots above show the raw and normalized data. Normalization factors are show
 plotDispEsts(dds)
 ```
 
-Above plot shows the per-gene dispersion estimates together with the fitted mean-dispersion relationship.
+Above plot shows the per-gene dispersion estimates and the fitted mean-dispersion relationship.
+Genes are represented by dots. Raw dispersion estimates are shown in black dots, while the trend fit line is shown in red. Shrunken final dispersion estimates are indicated by blue dots. Blue circles indicate dispersion values that are not shrunk.
 
 <br><br><br><br>
-
 
 ### heat-map with top variable genes 
 
@@ -352,7 +381,8 @@ Above plot shows the per-gene dispersion estimates together with the fitted mean
 getHeatmap(dds=dds, topN=500, annoGroup = c('SampleGroup'))
 ```
 
-The above plot shows a heatmap of the top 500 highly variable genes.
+Above plot shows a heatmap of the top 500 highly variable genes. Each row is a gene and each column represents a sample. Both samples and genes are clustered using hierarchical clustering. Samples are color coded by sample group.
+
 
 <br><br><br><br>
 
@@ -396,6 +426,10 @@ for( i in 1:nrow(contTab)){
   
   print(p_ma)
   
+  cat("\n\n", 'Above MA plot shows the average expression of a gene versus the log(fold change), with significant genes shown in red, non-significat genes shown in yellow and grey dots indicates genes that have undetermined adjusted p-value. Gene names labeled in black indicate the top differentially expressed genes and genes labeled in green indicate user-selected genes that may or may not be significant.', "\n")
+  
+  
+  
   # volcano plot
   catHeader(text = 'volcano plot', level = 4)
   
@@ -405,6 +439,9 @@ for( i in 1:nrow(contTab)){
                pValCutoff = pValCutoff)
   
   print(p_vol)
+  
+  cat("\n\n", 'Above volcano plot showing log(fold change) versus -log10(pval). As with the MA plot, significant genes shown in red and non-significat genes shown in yellow. Gene names labeled in black indicate the top differentially expressed genes and genes labeled in green indicate user-selected genes that may or may not be significant.', "\n") 
+  
   
   # p-value distribution plot
   catHeader(text = 'p-value distribution plot', level = 4)
@@ -416,19 +453,7 @@ for( i in 1:nrow(contTab)){
   
   print(p_pval)
   
-  # Karyogram plot
-  catHeader(text = 'Karyogram plot', level = 4)
-  
-  kPlot <- getKaryogramPlot(dds=dds,
-                 numerator = numerator,
-                 denominator = denominator,
-                 factorName = factorName,gtf = gtf,
-                 pValCutoff = pValCutoff,
-                 genome = genome
-
-                  )
-  
-  print(kPlot)
+  cat("\n\n", 'The plot above shows the distribution of p-values. There are twenty bins for the data, assuming that the null p-values are evenly distributed between 0 and 1, and that the first bin shows peaks for high-quality data. [How to interpret a p-value histogram?](http://varianceexplained.org/statistics/interpreting-pvalue-histogram/)', "\n")
   
   # gene counts plot
   catHeader(text = 'Gene counts plot', level = 4)
@@ -442,6 +467,8 @@ for( i in 1:nrow(contTab)){
                   topN=10, 
                   genesToShow=genesToShow)
   print(geneCtsPlot)
+  
+  cat("\n\n", 'Above plot shows the counts distribution of the top few genes. The counts are log2 transformed, and the X-axis shows the sample group. Dots represent counts from a sample from each group.', "\n")
 
 }
 
@@ -465,6 +492,8 @@ deSumTab %>%
     color= 'black',
     ontWeight='bold'
   )
-
 ```
+
+The table above shows the number of genes that are significantly differentially expressed for each contrast. Significantly differentially expressed genes (totalSigReg) are further divided into up-regulated genes (sigUpReg) and down-regulated genes (sigDownReg).
+
 
