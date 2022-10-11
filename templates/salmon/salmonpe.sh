@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-!{params.salmon_path} \
+salmon \
     quant \
     --threads !{Math.max(1, task.cpus - 1)} \
     -l A \
