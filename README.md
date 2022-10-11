@@ -78,14 +78,10 @@ Command line switches override values defined in `rnaseq.config`.
 
 #### Nextflow Further Configuration
 
-`alignment.config` is a full part of the
 [Nextflow configuration](https://www.nextflow.io/docs/latest/config.html).
-As such, and assuming one knows what one is doing, it can include any additional
-configuration documented in the Nextflow pages, such as
 [email notification](https://www.nextflow.io/docs/latest/config.html#scope-mail),
 [tuning processes](https://www.nextflow.io/docs/latest/config.html#scope-process) or
 [custom profiles](https://www.nextflow.io/docs/latest/config.html#config-profiles).
-
 
 ### Reference Data
 
@@ -116,8 +112,7 @@ export NXF_SINGULARITY_CACHEDIR=/data/my_nextflow_singularity_cache
 
 ### Content of `alignment.csv`
 
-The `alignment.csv` file drives the salmon pipequantification part of pipeline. It lists FASTQ files or file pairs, samples to whom those files belong, and additional information that can be added
-to the aligned files as read group annotations.
+The `alignment.csv` file drives the salmon pipequantification part of pipeline. It lists FASTQ files. It must contain at lest three columns.
 
 At CRUK-CI, we have the
 [kick start application](https://internal-bioinformatics.cruk.cam.ac.uk/docs/nf-kickstart)
