@@ -39,8 +39,6 @@ switch (params.quantTool)
         {
             include { SALMON } from "./processes/salmon"
             include { RNASEQREPORT } from "./processes/rnaseqreportprocess"
-            rScript = "./bin/runRNAseqReport.R"
-            rmdFile = "./bin/rnaseqReport.Rmd" 
         }
         else
         {
