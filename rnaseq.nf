@@ -32,7 +32,6 @@ if (!checkRNAseqContrastFile(params))
     exit 1
 }
 
-
 switch (params.quantTool)
 {
     case 'salmon':
@@ -52,7 +51,6 @@ switch (params.quantTool)
 }
 
 displayParameters(params)
-
 
 /*
  * Main work flow. For each sample in alignment.csv, start quantifying.
