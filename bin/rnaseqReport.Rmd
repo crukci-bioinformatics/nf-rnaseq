@@ -125,6 +125,7 @@ rownames(txi$abundance) <- str_remove(rownames(txi$abundance), '\\..*$' )
 rownames(txi$counts) <- str_remove(rownames(txi$counts), '\\..*$' )
 rownames(txi$length) <- str_remove(rownames(txi$length), '\\..*$' )
 
+
 rawCounts <- txi$counts
 mode(rawCounts) <- 'integer'
 rawCounts <- rawCounts[rowSums(rawCounts) > 0, ]
