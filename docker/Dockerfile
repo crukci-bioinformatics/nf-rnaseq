@@ -12,7 +12,7 @@ RUN dnf config-manager --set-enabled powertools
 RUN dnf makecache && dnf update -y
 
 RUN dnf install -y \
-    bzip2 bzip2-devel diffutils gcc-c++ git  \
+    bzip2 bzip2-devel diffutils gcc-c++ git libgit2-devel \
     libcurl-devel libxml2-devel make ncurses-devel openssl-devel \
     python3 python3-psycopg2 \
     R-core R-devel \
@@ -30,7 +30,8 @@ RUN curl https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x
 
 RUN /opt/conda/bin/conda config --add channels conda-forge
 RUN /opt/conda/bin/conda config --add channels bioconda
-RUN /opt/conda/bin/conda install salmon=1.8.0
+#RUN /opt/conda/bin/conda install salmon=1.8.0
+RUN /opt/conda/bin/conda install salmon=1.9.0
 
 RUN /usr/bin/R --vanilla -e \
     "install.packages(pkgs = c('devtools', 'BiocManager', 'rmarkdown', 'optparse', 'tidyverse' ), repos = c('https://cran.ma.imperial.ac.uk/', 'https://www.stats.bris.ac.uk/R/'))"
