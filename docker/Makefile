@@ -1,5 +1,5 @@
 #version ?= latest
-version ?= 0.2
+version ?= 0.3
 build:
 	docker build --tag crukcibioinformatics/rnaseq:${version} .
 
