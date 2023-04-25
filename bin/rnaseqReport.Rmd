@@ -191,7 +191,7 @@ Above plot above shows log2 transformed counts on the X-axis and density on the 
 
 
 
-### Ribosomal read fraction
+<!---### Ribosomal read fraction
 
 ```{r robo_fraction_plot}
 riboFractionPlot(countsData = rawCounts, gtf = gtf, s_sheet = s_sheet)
@@ -199,7 +199,7 @@ riboFractionPlot(countsData = rawCounts, gtf = gtf, s_sheet = s_sheet)
 
 Above plot shows the fraction of counts from ribosomal and nonribosomal genes. A sample name appears on the X-axis, and a percentage of counts appears on the Y-axis. In ideal circumstances, the ribosomal read fraction should be much lower than the nonribosomal fraction. 
 
-<br><br><br><br>
+<br><br><br><br> --->
 
 ### counts on gene biotype  
 
