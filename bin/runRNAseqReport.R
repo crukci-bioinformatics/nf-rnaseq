@@ -9,7 +9,7 @@ mkOptParser <- function() {
   options <- list(
     make_option(
       "--project",
-      type = "character", metavar = "projectName",
+      type = "character", metavar = "project",
       help = "The name of the project."
     ),
     make_option("--samplesheet",
@@ -67,10 +67,6 @@ mkOptParser <- function() {
     make_option("--templateDir",
       type = "character", metavar = "templateDir",
       help = "Report template ditectory"
-    ),
-    make_option("--reportFile",
-      type = "character", metavar = "reportFile",
-      help = "RNAseq report file name"
     )
   )
 
@@ -107,10 +103,11 @@ getUserPlayableRmd <- function(rawRmd, varFile, titleName) {
 }
 
 rnaSeqReport <- function(opts) {
-  genome <- opts$genome
+  
   varList <- list(
-    projectName = opts$project,
+    
     samplesheet = opts$samplesheet,
+    project = opts$project,
     genome = opts$genome,
     assembly = opts$assembly,
     quantOut = opts$quantOut,
@@ -123,12 +120,13 @@ rnaSeqReport <- function(opts) {
     DeOutDir = opts$DeOutDir,
     pValCutoff = opts$pValCutoff,
     genesToShow = opts$genesToShow,
-    templateDir = opts$templateDir,
-    reportFile = opts$reportFile
+    templateDir = opts$templateDir
+    
   )
 
-  projectName <- opts$project
+  #genome <- opts$genome
   samplesheet <- opts$samplesheet
+  project <- opts$project
   genome <- opts$genome
   assembly <- opts$assembly
   quantOut <- opts$quantOut
@@ -142,8 +140,8 @@ rnaSeqReport <- function(opts) {
   pValCutoff <- opts$pValCutoff
   genesToShow <- opts$genesToShow
   templateDir <- opts$templateDir
-  reportFile <- opts$reportFile
-
+  
+  reportFile <- str_c(project, ".html", sep="")
 
   render("rnaseqReport.Rmd",
     output_file = reportFile,
@@ -152,13 +150,17 @@ rnaSeqReport <- function(opts) {
   )
 
   varFile <- "variables.txt"
+  
 
+  if(is.null(varList$genesToShow)){
+    varList$genesToShow <- "NULL"
+  }
   writeVariablesForRmd(varList = varList, outFile = varFile)
 
   getUserPlayableRmd(
     rawRmd = "rnaseqReport.Rmd",
     varFile = varFile,
-    titleName = projectName
+    titleName = project
   )
 }
 ##################### END OF FUNCTIONS #######################################

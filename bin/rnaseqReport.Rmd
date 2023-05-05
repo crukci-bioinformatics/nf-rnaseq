@@ -1,5 +1,5 @@
 ---
-title: 'RNA-Seq Report: Project **`r projectName`**'
+title: 'RNA-Seq Report: `r project`'
 author: "Bioinformatics Core"
 date: "`r format(Sys.time(), '%a %d %b %Y')`"
 output:
@@ -9,7 +9,6 @@ output:
     toc: yes
     toc_float: yes
     smooth_scroll: yes
-    code_folding: hide
 ---
 
 
@@ -22,7 +21,7 @@ suppressPackageStartupMessages(library(RColorBrewer))
 suppressPackageStartupMessages(library(DESeq2))
 suppressPackageStartupMessages(library(assertthat))
 # knitr global options
-knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning = FALSE, cache = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning = FALSE, cache = FALSE)
 ```
 
 
@@ -52,7 +51,7 @@ genome_name <- str_replace(genome, "_", " ") %>%
 
 # Introduction  
 
-* This report summarizes a differential gene expression analysis of the **`r projectName`** project.
+* This report summarizes a differential gene expression analysis of the **`r project`** project.
 * Genome: **`r genome_name`**  
 * Assembly: **`r assembly`**
 * Design: **`r design`**
@@ -60,10 +59,10 @@ genome_name <- str_replace(genome, "_", " ") %>%
 # Pipeline Overview
 
 * The pipeline has many steps, but the major ones are:
-  * Quantify the expression of transcripts using RNA-seq data using Salmon tool. 
-  * Count number of reads assigned to genes.
-  * Carry out the differential expression analysis.
-  * Generate a report describing the results.
+  * Using the [Salmon](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5600148/) tool, quantify the expression of transcripts. 
+  * Count the number of reads assigned to each gene.
+  * Analyze the differential expression of genes using [DESeq2](https://pubmed.ncbi.nlm.nih.gov/25516281/).
+  * Prepare a report describing the results of the study.
   
 ```{r def_vars} 
 # load data
@@ -133,8 +132,7 @@ rawCounts <- rawCounts[rowSums(rawCounts) > 0, ]
 
 # Quality Control (QC)
 
-QC section lists some basic quality control numbers: how many reads per sample and how
-many were assigned to specific features, i.e. genes are included in the analysis.
+Several basic quality control metrics are listed in the quality control section, including the number of reads per sample and the number of reads assigned to specific features, such as genes.
 
 ##  QC on reads per sample {.tabset}   
 
@@ -173,7 +171,7 @@ The barplot above shows the number of reads per sample. The X-axis shows the num
 readsPerGroupBoxplot(s_sheet = s_sheet, readCounts = readsPerSample)
 ```
 
-Above plot each sample group is represented by a boxplot of reads per sample. The X-axis shows the sample group and the Y-axis shows the number of reads. Dots represent samples. 
+In the above plot, each sample group is represented by a box-plot of reads for each sample. A sample group is shown on the X-axis, and the number of reads is shown on the Y-axis. Samples are represented by dots. 
 
 <br><br><br>
 
@@ -185,7 +183,7 @@ Above plot each sample group is represented by a boxplot of reads per sample. Th
 countsDensityPlot(s_sheet = s_sheet, countsData = rawCounts)
 ```
 
-Above plot above shows log2 transformed counts on the X-axis and density on the Y-axis. Low counts are indicated by density on the left side of the plot, and zero-inflated data are indicated by extreme left shifts. If a sample shows both low counts and/or zero-inflated counts, further investigation may be needed. 
+In the above plot, log2 transformed counts are shown on the X-axis and density is shown on the Y-axis. Low counts are indicated by density on the left side of the plot, while zero-inflated data are indicated by extreme left shifts. Further investigation may be necessary if a sample shows both low counts and zero-inflated counts. 
 
 <br><br><br><br>
 
@@ -348,7 +346,7 @@ saveCounts(dds = dds, txi = txi, countsDir = countsDir, gtf = gtf )
 <br><br>
 [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) package is used for differential expression analysis.
 
-### Normalisation plots {.tabset}
+### Counts distribution {.tabset}
 
 #### Raw counts distribution
 
@@ -438,7 +436,7 @@ for( i in 1:nrow(contTab)){
   
   
   # volcano plot
-  catHeader(text = 'volcano plot', level = 4)
+  catHeader(text = 'Volcano plot', level = 4)
   
   p_vol <- getVolcanoPlot(res=res, numerator = numerator,
                denominator = denominator,
@@ -503,4 +501,27 @@ deSumTab %>%
 
 The table above shows the number of genes that are significantly differentially expressed for each contrast. Significantly differentially expressed genes (totalSigReg) are further divided into up-regulated genes (sigUpReg) and down-regulated genes (sigDownReg).
 
+# Session Info
+```{r session_info}
+sessionInfo()
+```
 
+# Citations
+
+* R Core Team (2023). _R: A Language and Environment for Statistical Computing_.
+  R Foundation for Statistical Computing, Vienna, Austria.
+  <https://www.R-project.org/>.
+
+* Yihui Xie (2023). knitr: A General-Purpose Package for Dynamic Report
+  Generation in R. R package version 1.42.
+
+* Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G,
+  Hayes A, Henry L, Hester J, Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K,
+  Ooms J, Robinson D, Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo
+  K, Yutani H (2019). “Welcome to the tidyverse.” _Journal of Open Source
+  Software_, *4*(43), 1686. doi:10.21105/joss.01686
+  <https://doi.org/10.21105/joss.01686>.
+  
+* Love, M.I., Huber, W., Anders, S. Moderated estimation of fold change and
+  dispersion for RNA-seq data with DESeq2 Genome Biology 15(12):550 (2014)
+  
