@@ -17,6 +17,5 @@ Rscript bin/runRNAseqReport.R \
     --DeOutDir=!{DeOutDir} \
     --pValCutoff=!{pValCutoff} \
     --genesToShow=!{genesToShow} \
-    --templateDir=!{templateDir} \
-    --reportFile=!{reportFile}
+    --templateDir=!{templateDir} 
 
