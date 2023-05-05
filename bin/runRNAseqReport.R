@@ -67,6 +67,10 @@ mkOptParser <- function() {
     make_option("--templateDir",
       type = "character", metavar = "templateDir",
       help = "Report template ditectory"
+    ),
+    make_option("--reportFile",
+                type = "character", metavar = "reportFile",
+                help = "RNAseq report file name"
     )
   )
 
@@ -120,7 +124,8 @@ rnaSeqReport <- function(opts) {
     DeOutDir = opts$DeOutDir,
     pValCutoff = opts$pValCutoff,
     genesToShow = opts$genesToShow,
-    templateDir = opts$templateDir
+    templateDir = opts$templateDir,
+    reportFile = opts$reportFile
     
   )
 
@@ -140,8 +145,8 @@ rnaSeqReport <- function(opts) {
   pValCutoff <- opts$pValCutoff
   genesToShow <- opts$genesToShow
   templateDir <- opts$templateDir
-  
-  reportFile <- str_c(project, ".html", sep="")
+  reportFile = opts$reportFile
+
 
   render("rnaseqReport.Rmd",
     output_file = reportFile,
