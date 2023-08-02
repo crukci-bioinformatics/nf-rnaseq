@@ -1,7 +1,7 @@
 /*
 * process for running salmon
 */
-
+import nextflow.util.BlankSeparatedList
 /*
 * Quantification with salmon (pair-end reads)
 * TODO: Quantification with single-end reads to be implimented

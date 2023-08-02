@@ -1,7 +1,7 @@
 /*
 * process for running RNAseq report
 */
-
+import nextflow.util.BlankSeparatedList
 /*
 * TODO: Currently, this process copies everything to the work directory (stageInMode 'copy')
 * A report is then generated
@@ -10,6 +10,7 @@
 
 
 process RNASEQREPORT () {
+    
     label 'report'
 
     stageInMode 'copy'
