@@ -9,13 +9,13 @@ import nextflow.util.BlankSeparatedList
 
 process SALMON 
 {
-    label 'salmon'
-    publishDir "${params.quantOutDir}", mode:"copy"
-    
+    //label 'salmon'
     cpus 4
     memory { 8.GB * task.attempt }
     time 3.hour
     maxRetries 2
+
+    publishDir "${params.quantOutDir}", mode:"copy"
     
     input:
         tuple val(sample_name),  file(r1_fqs), file(r2_fqs), path(index)

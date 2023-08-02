@@ -10,19 +10,19 @@ import nextflow.util.BlankSeparatedList
 
 
 process RNASEQREPORT () {
-    
-    label 'report'
+
+    //label 'report'
+
+    cpus 4
+    memory { 8.GB * task.attempt }
+    time 3.hour
+    maxRetries 2
 
     stageInMode 'copy'
     //publishDir "${projectDir}", mode:"copy"
     //publishDir "${workDir}", mode:"copy"
     publishDir "${launchDir}", mode:"copy"
 
-    cpus 4
-    memory { 8.GB * task.attempt }
-    time 3.hour
-    maxRetries 2
-    
     input:
         tuple val(projectName),
             val(genome),
