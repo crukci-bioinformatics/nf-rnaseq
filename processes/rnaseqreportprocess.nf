@@ -10,6 +10,7 @@
 
 
 process RNASEQREPORT () {
+    label 'report'
 
     stageInMode 'copy'
     //publishDir "${projectDir}", mode:"copy"

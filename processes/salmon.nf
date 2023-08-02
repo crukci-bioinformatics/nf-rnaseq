@@ -9,6 +9,7 @@
 
 process SALMON 
 {
+    label 'salmon'
     publishDir "${params.quantOutDir}", mode:"copy"
     
     cpus 4
