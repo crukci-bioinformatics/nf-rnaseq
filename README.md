@@ -1,4 +1,4 @@
-##  CRUK-CI Bioinformatics RNAseq pipeile - Nexflow based
+##  CRUK-CI Bioinformatics RNAseq pipeline - Nexflow based
 This is new RNAseq pipeline using Nexiflow rather than in house work flow manager.
 ### What does it do?
 Transcript level quantification is performed using salmon on raw fastq files. Next, it generates various quality control metrics, followed by DESeq2 differential expression and generates a HTML report that contains all plots.
