@@ -45,14 +45,14 @@ catHeader <- function(text = "", level = 3, is_tabset=FALSE) {
 
 ```{r variable_substitute}
 pValCutoff <- as.numeric(pValCutoff)
-genome_name <- str_replace(genome, "_", " ") %>% 
+species_name <- str_replace(species, "_", " ") %>% 
   str_to_sentence()
 ```
 
 # Introduction  
 
 * This report summarizes a differential gene expression analysis of the **`r project`** project.
-* Genome: **`r genome_name`**  
+* species: **`r species_name`**  
 * Assembly: **`r assembly`**
 * Design: **`r design`**
 

@@ -16,8 +16,8 @@ mkOptParser <- function() {
       type = "character", metavar = "samplesheet",
       help = "Sample sheet file"
     ),
-    make_option("--genome",
-      type = "character", metavar = "genome",
+    make_option("--species",
+      type = "character", metavar = "species",
       help = "The name of the species."
     ),
     make_option("--assembly",
@@ -112,7 +112,7 @@ rnaSeqReport <- function(opts) {
     
     samplesheet = opts$samplesheet,
     project = opts$project,
-    genome = opts$genome,
+    species = opts$species,
     assembly = opts$assembly,
     quantOut = opts$quantOut,
     tx2geneFile = opts$tx2geneFile,
@@ -129,10 +129,10 @@ rnaSeqReport <- function(opts) {
     
   )
 
-  #genome <- opts$genome
+  #species <- opts$species
   samplesheet <- opts$samplesheet
   project <- opts$project
-  genome <- opts$genome
+  species <- opts$species
   assembly <- opts$assembly
   quantOut <- opts$quantOut
   tx2geneFile <- opts$tx2geneFile
@@ -169,7 +169,7 @@ rnaSeqReport <- function(opts) {
   )
 }
 ##################### END OF FUNCTIONS #######################################
-# Rscript runRNAseqReport.R --samplesheet=/Users/chilam01/Desktop/rnaseqRcode/data/samplesheet_corrected.csv --project=test_project --genome=Mus_musculus --assembly=GRCm38 --quantOut=/Users/chilam01/Desktop/rnaseqRcode/data/quantOut --tx2geneFile=/Users/chilam01/Desktop/rnaseqRcode/data/references/tx2gene.tsv --gtfFile="/Users/chilam01/Desktop/rnaseqRcode/data/references/mmu.GRCm38.gtf" --contrastFile="/Users/chilam01/Desktop/rnaseqRcode/data/contrasts.csv" --design=SampleGroup --countsDir="/Users/chilam01/Desktop/rnaseqRcode/data/counts" --factorName=SampleGroup --DeOutDir=/Users/chilam01/Desktop/rnaseqRcode/data/DEAnalysis/test1  --pValCutoff=0.05 --genesToShow=ESR1 --templateDir=/Users/chilam01/Desktop/rnaseqRcode/temp --reportFile=/Users/chilam01/Desktop/rnaseqRcode/temp/xxx.html
+# Rscript runRNAseqReport.R --samplesheet=/Users/chilam01/Desktop/rnaseqRcode/data/samplesheet_corrected.csv --project=test_project --species=Mus_musculus --assembly=GRCm38 --quantOut=/Users/chilam01/Desktop/rnaseqRcode/data/quantOut --tx2geneFile=/Users/chilam01/Desktop/rnaseqRcode/data/references/tx2gene.tsv --gtfFile="/Users/chilam01/Desktop/rnaseqRcode/data/references/mmu.GRCm38.gtf" --contrastFile="/Users/chilam01/Desktop/rnaseqRcode/data/contrasts.csv" --design=SampleGroup --countsDir="/Users/chilam01/Desktop/rnaseqRcode/data/counts" --factorName=SampleGroup --DeOutDir=/Users/chilam01/Desktop/rnaseqRcode/data/DEAnalysis/test1  --pValCutoff=0.05 --genesToShow=ESR1 --templateDir=/Users/chilam01/Desktop/rnaseqRcode/temp --reportFile=/Users/chilam01/Desktop/rnaseqRcode/temp/xxx.html
 options(stringsAsFactors = FALSE)
 # get arguments
 parser <- mkOptParser()

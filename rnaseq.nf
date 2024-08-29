@@ -67,7 +67,7 @@ workflow
 
     report_ch = Channel.of([
         "${params.projectName}",
-        "${params.genome}", 
+        "${params.species}", 
         "${params.assembly}", 
         "${params.shortSpecies}", 
         "${params.design}",

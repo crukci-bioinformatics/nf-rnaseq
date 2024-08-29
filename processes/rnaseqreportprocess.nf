@@ -25,7 +25,7 @@ process RNASEQREPORT () {
 
     input:
         tuple val(projectName),
-            val(genome),
+            val(species),
             val(assembly),
             val(shortSpecies),
             val(design),
@@ -53,7 +53,7 @@ process RNASEQREPORT () {
     """
         Rscript "${rScript}" \
         --project="${projectName}" \
-        --genome="${genome}" \
+        --species="${species}" \
         --assembly="${assembly}" \
         --design="${design}" \
         --factorName="${colorFactors}" \

@@ -5,7 +5,7 @@ set -o pipefail
 Rscript bin/runRNAseqReport.R \
     --project=!{projectName} \
     --samplesheet=!{sampleSheet} \
-    --genome=!{genome} \
+    --species=!{species} \
     --assembly=!{assembly} \
     --quantOut==!{quantOutDir} \
     --tx2geneFile=!{tx2gene} \
