@@ -1,0 +1,4 @@
+SampleName,Read1,Read2
+sampleA,sampleA_L1_r1.fq.gz,sampleA_L1_r2.fq.gz
+sampleA,sampleA_L2_r1.fq.gz,sampleA_L2_r2.fq.gz
+sampleB,sampleB_r1.fq.gz,sampleB_r2.fq.gz

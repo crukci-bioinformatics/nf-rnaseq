@@ -2,10 +2,6 @@
  * Functions used in checking the configuration of the pipeline before it starts.
  */
 
-@Grab('org.apache.commons:commons-csv:1.8')
-import java.nio.file.Files
-import org.apache.commons.csv.*
-
 include { logException } from './debugging'
 
 /*
@@ -18,187 +14,176 @@ def checkParameters(params)
     def referenceRootWarned = false
     def referenceRootWarning = 'Reference data root directory not set. Use --referenceRoot with path to the top of the reference structure.'
 
-    params.with
+    // Basic settings
+
+    if (!params.containsKey('quantTool'))
     {
-        // Basic settings
+        log.error "quantificatio tool not specified. Use --quantTool with 'salmon'."
+        errors = true
+    }
+    if (!params.containsKey('endType'))
+    {
+        log.error "Sequencing method not set. Use --endType with 'se' (single read) or 'pe' (paired end)."
+        errors = true
+    }
+    if (!params.containsKey('species'))
+    {
+        log.error 'Species folder not set. Use --species and give the species name with underscores in place of spaces, eg. "homo_sapiens".'
+        errors = true
+    }
+    if (!params.containsKey('shortSpecies'))
+    {
+        log.error 'Species abbreviation not set. Use --shortSpecies  to set it, eg. "hsa", "mmu".'
+        errors = true
+    }
+    if (!params.containsKey('assembly'))
+    {
+        log.error 'Genome assembly not set. Use --assembly  to set it, eg. "GRCh38".'
+        errors = true
+    }
+    if (!params.containsKey('salmonVersion'))
+    {
+        log.error 'salman version not set. Use --salmonVersion  to set it, eg. "1.8.0".'
+        errors = true
+    }
+    if (!params.containsKey('fastqDir'))
+    {
+        log.error 'fastq folder not set. Use --fastqDir  to set it, eg. "fastq".'
+        errors = true
+    }
+    if (!params.containsKey('quantOutDir'))
+    {
+        log.error 'quantification output folder is not set. use --quantOutDir  to set it, eg. "salmonOut"'
+        errors = true
+    }
+    if (!params.containsKey('kmerLen'))
+    {
+        log.error 'salmon kmer length not set. use --kmerLen  to set it, eg. "31"'
+        errors = true
+    }
+    if (!params.containsKey('sampleSheet'))
+    {
+        log.error 'RNAseq sample sheet not set. use --sampleSheet  to set it. eg. "samplesheet.csv"'
+        errors = true
+    }
 
-        if (!containsKey('quantTool'))
-        {
-            log.error "quantificatio tool not specified. Use --quantTool with 'salmon'."
-            errors = true
-        }
-        if (!containsKey('endType'))
-        {
-            log.error "Sequencing method not set. Use --endType with 'se' (single read) or 'pe' (paired end)."
-            errors = true
-        }
-        if (!containsKey('species'))
-        {
-            log.error 'Species folder not set. Use --species and give the species name with underscores in place of spaces, eg. "homo_sapiens".'
-            errors = true
-        }
-        if (!containsKey('shortSpecies'))
-        {
-            log.error 'Species abbreviation not set. Use --shortSpecies  to set it, eg. "hsa", "mmu".'
-            errors = true
-        }
-        if (!containsKey('assembly'))
-        {
-            log.error 'Genome assembly not set. Use --assembly  to set it, eg. "GRCh38".'
-            errors = true
-        }
-        if (!containsKey('salmonVersion'))
-        {
-            log.error 'salman version not set. Use --salmonVersion  to set it, eg. "1.8.0".'
-            errors = true
-        }
-        if (!containsKey('fastqDir'))
-        {
-            log.error 'fastq folder not set. Use --fastqDir  to set it, eg. "fastq".'
-            errors = true
-        }
-        if (!containsKey('quantOutDir'))
-        {
-            log.error 'quantification output folder is not set. use --quantOutDir  to set it, eg. "salmonOut"'
-            errors = true
-        }
-        if (!containsKey('kmerLen'))
-        {
-            log.error 'salmon kmer length not set. use --kmerLen  to set it, eg. "31"'
-            errors = true
-        }
-        if (!containsKey('sampleSheet'))
-        {
-            log.error 'RNAseq sample sheet not set. use --sampleSheet  to set it. eg. "samplesheet.csv"'
-            errors = true
-        }
+    if (!params.containsKey('projectName'))
+    {
+        log.error 'RNAseq project name not set. use --projectName  to set it, eg. "test_project"'
+        errors = true
+    }
 
-        if (!containsKey('projectName'))
+    if (!params.containsKey('contrastFile'))
+    {
+        log.error 'RNAseq contrast file not set. use --contrastFile  to set it, eg. "contrast.csv"'
+        errors = true
+    }
+
+    if (!params.containsKey('design'))
+    {
+        log.error 'RNAseq design not set. use --design to set it, eg. "SampleGroup+Treatment"'
+        errors = true
+    }
+
+    if (!params.containsKey('countsDir'))
+    {
+        log.error 'RNAseq counts directory not set. use --countsDir to set it, eg. "counts"'
+        errors = true
+    }
+
+    if (!params.containsKey('colorFactors'))
+    {
+        log.error 'RNAseq color factors (column names of metadata sheet) not set. use --colorFactors to set it, eg. "SampleGroup,batch"'
+        errors = true
+    }
+
+    if (!params.containsKey('DeOutDir'))
+    {
+        log.error 'RNAseq DE output folder name not set. use --DeOutDir to set it, eg. "DE_analysis"'
+        errors = true
+    }
+
+    if (!params.containsKey('pValCutoff'))
+    {
+        log.error 'RNAseq p-value cut-off not set. use --pValCutoff to set it, eg. "0.05"'
+        errors = true
+    }
+
+    if (!params.containsKey('genesToShow'))
+    {
+        log.error 'RNAseq, gene names to show on plots not set. use --genesToShow to set it, eg. "ESR1"'
+        errors = true
+    }
+
+    if (!params.containsKey('templateDir'))
+    {
+        log.error 'RNAseq,report template directory not set. use --templateDir to set it, eg. "report_dir"'
+        errors = true
+    }
+
+    if (!params.containsKey('reportFile'))
+    {
+        log.error 'RNAseq,report file name not set. use --reportFile to set it, eg. "RNAseqReport.html"'
+        errors = true
+    }
+
+    if (errors)
+    {
+        log.warn "Missing arguments can also be added to rnaseq.config instead of being supplied on the command line."
+        return false
+    }
+
+    params.quantTool = params.quantTool.toLowerCase()
+    params.assemblyPrefix = "${params.shortSpecies}.${params.assembly}"
+
+    // Decipher single read or paired end
+    // Currently only supports pair end reads
+
+    def endTypeChar = params.endType.toLowerCase()[0]
+    if (endTypeChar == 's')
+    {
+        params.pairedEnd = false
+    }
+    else if (endTypeChar == 'p')
+    {
+        params.pairedEnd = true
+    }
+    else
+    {
+        log.error "End type must be given to indicate single read (se/sr) or paired end (pe)."
+        errors = true
+    }
+
+    if (params.quantTool == 'salmon')
+    {
+        if (!params.containsKey('salmonIndex'))
         {
-            log.error 'RNAseq project name not set. use --projectName  to set it, eg. "test_project"'
-            errors = true
-        }
-
-        if (!containsKey('contrastFile'))
-        {
-            log.error 'RNAseq contrast file not set. use --contrastFile  to set it, eg. "contrast.csv"'
-            errors = true
-        }
-
-        if (!containsKey('design'))
-        {
-            log.error 'RNAseq design not set. use --design to set it, eg. "SampleGroup+Treatment"'
-            errors = true
-        }
-
-        if (!containsKey('countsDir'))
-        {
-            log.error 'RNAseq counts directory not set. use --countsDir to set it, eg. "counts"'
-            errors = true
-        }
-
-        if (!containsKey('colorFactors'))
-        {
-            log.error 'RNAseq color factors (column names of metadata sheet) not set. use --colorFactors to set it, eg. "SampleGroup,batch"'
-            errors = true
-        }
-
-        if (!containsKey('DeOutDir'))
-        {
-            log.error 'RNAseq DE output folder name not set. use --DeOutDir to set it, eg. "DE_analysis"'
-            errors = true
-        }
-
-        if (!containsKey('pValCutoff'))
-        {
-            log.error 'RNAseq p-value cut-off not set. use --pValCutoff to set it, eg. "0.05"'
-            errors = true
-        }
-
-        if (!containsKey('genesToShow'))
-        {
-            log.error 'RNAseq, gene names to show on plots not set. use --genesToShow to set it, eg. "ESR1"'
-            errors = true
-        }
-
-        if (!containsKey('templateDir'))
-        {
-            log.error 'RNAseq,report template directory not set. use --templateDir to set it, eg. "report_dir"'
-            errors = true
-        }
-
-        if (!containsKey('reportFile'))
-        {
-            log.error 'RNAseq,report file name not set. use --reportFile to set it, eg. "RNAseqReport.html"'
-            errors = true
-        }
-
-        if (errors)
-        {
-            log.warn "Missing arguments can also be added to rnaseq.config instead of being supplied on the command line."
-            return false
-        }
-
-        quantTool = quantTool.toLowerCase()
-        assemblyPrefix = "${shortSpecies}.${assembly}"
-
-        // Decipher single read or paired end 
-        // Currently only supports pair end reads
-        
-
-        switch (endType.toLowerCase()[0])
-        {
-            case 's':
-                pairedEnd = false
-                break
-
-            case 'p':
-                pairedEnd = true
-                break
-
-            default:
-                log.error "End type must be given to indicate single read (se/sr) or paired end (pe)."
-                errors = true
-                break
-        }
-
-        switch (quantTool)
-        {
-            case 'salmon':
-                if (!containsKey('salmonIndex'))
+            if (!params.containsKey('referenceRoot'))
+            {
+                if (!referenceRootWarned)
                 {
-                    if (!containsKey('referenceRoot'))
-                    {
-                        if (!referenceRootWarned)
-                        {
-                            log.error referenceRootWarning
-                            referenceRootWarned = true
-                        }
-                        errors = true
-                    }
-                    else
-                    {
-                        salmonIndex = "${referenceRoot}/${species}/${assembly}/salmon-${salmonVersion}/k${kmerLen}"
-                        tx2gene = "${referenceRoot}/${species}/${assembly}/salmon-${salmonVersion}/tx2gene.tsv"
-                        gtfFile = "${referenceRoot}/${species}/${assembly}/annotation/${shortSpecies}.${assembly}.gtf"
-                    }
+                    log.error referenceRootWarning
+                    referenceRootWarned = true
                 }
-                break
-
-            default:
-                log.error "quantification tool must be 'salmon'."
                 errors = true
-                break
+            }
+            else
+            {
+                params.salmonIndex = "${params.referenceRoot}/${params.species}/${params.assembly}/salmon-${params.salmonVersion}/k${params.kmerLen}"
+                params.tx2gene = "${params.referenceRoot}/${params.species}/${params.assembly}/salmon-${params.salmonVersion}/tx2gene.tsv"
+                params.gtfFile = "${params.referenceRoot}/${params.species}/${params.assembly}/annotation/${params.shortSpecies}.${params.assembly}.gtf"
+            }
         }
+    }
+    else
+    {
+        log.error "quantification tool must be 'salmon'."
+        errors = true
+    }
 
-        // Check if reference files and directories are set. If not, default to our
-        // standard structure.
+    // Check if reference files and directories are set. If not, default to our
+    // standard structure.
 
-        if (errors)
-        {
-            return false
-        } 
-    } 
     return !errors
 }
 
@@ -209,19 +194,14 @@ def checkParameters(params)
 
 def displayParameters(params)
 {
-    params.with
+    log.info "${params.pairedEnd ? 'Paired end' : 'Single read'} quantification against ${params.species} ${params.assembly} using ${params.quantTool.toUpperCase()}."
+
+    if (params.quantTool == 'salmon')
     {
-        log.info "${pairedEnd ? 'Paired end' : 'Single read'} quantification against ${species} ${assembly} using ${quantTool.toUpperCase()}."
-        
-        switch (quantTool)
-        {
-            case 'salmon':
-                log.info "salmon index: ${salmonIndex}"
-                log.info "tx2gene file: ${tx2gene}"
-                log.info "salmon version: ${salmonVersion}"
-                log.info "salmon kmer length: ${kmerLen}"
-                break
-        }
+        log.info "salmon index: ${params.salmonIndex}"
+        log.info "tx2gene file: ${params.tx2gene}"
+        log.info "salmon version: ${params.salmonVersion}"
+        log.info "salmon kmer length: ${params.kmerLen}"
     }
 }
 
@@ -235,57 +215,49 @@ def checkKickstartCSV(params)
     def ok = true
     try
     {
-        def driverFile = file(params.kickstartCSV)
-        driverFile.withReader('UTF-8')
+        def rows = file(params.kickstartCSV).splitCsv(header: true, quote: '"', strip: true)
+        def headers = rows ? rows[0].keySet() : []
+
+        if (!headers.contains('Read1'))
         {
-            stream ->
-            def parser = CSVParser.parse(stream, CSVFormat.DEFAULT.withHeader())
-            def first = true
+            log.error "${params.kickstartCSV} must contain a column 'Read1'."
+            ok = false
+        }
+        if (params.pairedEnd && !headers.contains('Read2'))
+        {
+            log.error "${params.kickstartCSV} must contain a column 'Read2' for paired end."
+            ok = false
+        }
+        if (!headers.contains('SampleName'))
+        {
+            log.error "${params.kickstartCSV} must contain a column 'SampleName'."
+            ok = false
+        }
 
-            for (record in parser)
-            {
-                if (first)
-                {
-                    if (!record.isMapped('Read1'))
-                    {
-                        log.error "${params.kickstartCSV} must contain a column 'Read1'."
-                        ok = false
-                    }
-                    if (params.pairedEnd && !record.isMapped('Read2'))
-                    {
-                        log.error "${params.kickstartCSV} must contain a column 'Read2' for paired end."
-                        ok = false
-                    }
-                    if (!record.isMapped('SampleName'))
-                    {
-                        log.error "${params.kickstartCSV} must contain a column 'SampleName'."
-                        ok = false
-                    }
-                    first = false
-                    if (!ok)
-                    {
-                        break
-                    }
-                }
-
-                def rowNum = parser.recordNumber + 1
-                if (!record.get('Read1'))
+        if (ok)
+        {
+            rows.eachWithIndex
+            { record, idx ->
+                def rowNum = idx + 2
+                if (!record.Read1)
                 {
                     log.error "In ${params.kickstartCSV} file; No 'Read1' file name set on line ${rowNum}."
                     ok = false
                 }
-                if (params.pairedEnd && !record.get('Read2'))
+                if (params.pairedEnd && !record.Read2)
                 {
                     log.error "In ${params.kickstartCSV} file; No 'Read2' file name set on line ${rowNum}."
                     ok = false
                 }
 
-                if (!record.get('SampleName'))
+                if (!record.SampleName)
                 {
                     log.error "In ${params.kickstartCSV} file; No 'SampleName' defined on line ${rowNum}."
                     ok = false
-                } else {
-                    s = record.get('SampleName')
+                }
+                else
+                {
+                    def s = record.SampleName
                     if (Character.isDigit(s.charAt(0)))
                     {
                         log.error "In ${params.kickstartCSV} file; Sample name '${s}', can not start with a number on line ${rowNum}."
@@ -297,7 +269,6 @@ def checkKickstartCSV(params)
                         ok = false
                     }
                 }
-                
             }
         }
     }
@@ -323,43 +294,34 @@ def checkRNAseqSampleSheet(params)
     def ok = true
     try
     {
-        def driverFile = file(params.sampleSheet)
-        driverFile.withReader('UTF-8')
+        def rows = file(params.sampleSheet).splitCsv(header: true, quote: '"', strip: true)
+        def headers = rows ? rows[0].keySet() : []
+
+        if (!headers.contains('SampleName'))
         {
-            stream ->
-            def parser = CSVParser.parse(stream, CSVFormat.DEFAULT.withHeader())
-            def first = true
+            log.error "${params.sampleSheet} must contain a column 'SampleName'."
+            ok = false
+        }
 
-            for (record in parser)
-            {
-                if (first)
-                {
-                    if (!record.isMapped('SampleName'))
-                    {
-                        log.error "${params.sampleSheet} must contain a column 'SampleName'."
-                        ok = false
-                    }
+        if (!headers.contains('SampleGroup'))
+        {
+            log.error "${params.sampleSheet} must contain a column 'SampleGroup'."
+            ok = false
+        }
 
-                    if (!record.isMapped('SampleGroup'))
-                    {
-                        log.error "${params.sampleSheet} must contain a column 'SampleGroup'."
-                        ok = false
-                    }
-
-                    first = false
-                    if (!ok)
-                    {
-                        break
-                    }
-                }
-
-                def rowNum = parser.recordNumber + 1
-                if (!record.get('SampleName'))
+        if (ok)
+        {
+            rows.eachWithIndex
+            { record, idx ->
+                def rowNum = idx + 2
+                if (!record.SampleName)
                 {
                     log.error "In ${params.sampleSheet} file,  No 'SampleName'  name set on line ${rowNum}."
                     ok = false
-                } else {
-                    s = record.get('SampleName')
+                }
+                else
+                {
+                    def s = record.SampleName
                     if (Character.isDigit(s.charAt(0)))
                     {
                         log.error "In ${params.sampleSheet} file, Sample name ${s}, can not start with a number on line ${rowNum}."
@@ -371,15 +333,15 @@ def checkRNAseqSampleSheet(params)
                         ok = false
                     }
                 }
-                
-                
-                if (!record.get('SampleGroup'))
+
+                if (!record.SampleGroup)
                 {
                     log.error "No 'SampleGroup' defined on line ${rowNum}."
                     ok = false
-                } else {
-
-                    s = record.get('SampleGroup')
+                }
+                else
+                {
+                    def s = record.SampleGroup
                     if (Character.isDigit(s.charAt(0)))
                     {
                         log.error "In ${params.sampleSheet} file, Sample group '${s}'', can not start with a number on line ${rowNum}."
@@ -390,7 +352,6 @@ def checkRNAseqSampleSheet(params)
                         log.error "In ${params.sampleSheet} file, Sample group '${s}', can not contain white space and/or special character line ${rowNum}. Only 'a-z,A-Z,0-9, .,and _' are allowed"
                         ok = false
                     }
-
                 }
             }
         }
@@ -412,54 +373,37 @@ def checkRNAseqContrastFile(params)
     def ok = true
     try
     {
-        def driverFile = file(params.contrastFile)
-        driverFile.withReader('UTF-8')
+        def rows = file(params.contrastFile).splitCsv(header: true, quote: '"', strip: true)
+        def headers = rows ? rows[0].keySet() : []
+
+        if (!headers.contains('numerator'))
         {
-            stream ->
-            def parser = CSVParser.parse(stream, CSVFormat.DEFAULT.withHeader())
-            def first = true
+            log.error "${params.contrastFile} must contain a column 'numerator'."
+            ok = false
+        }
 
-            for (record in parser)
-            {
-                if (first)
-                {
-                    if (!record.isMapped('numerator'))
-                    {
-                        log.error "${params.contrastFile} must contain a column 'numerator'."
-                        ok = false
-                    }
+        if (!headers.contains('denominator'))
+        {
+            log.error "${params.contrastFile} must contain a column 'denominator'."
+            ok = false
+        }
 
-                    if (!record.isMapped('denominator'))
-                    {
-                        log.error "${params.contrastFile} must contain a column 'denominator'."
-                        ok = false
-                    }
-
-                    if ( !record.isMapped('numerator') && !record.isMapped('denominator') )
-                    {
-                        log.error "${params.contrastFile} must contain 'numerator' and  'denominator' columns."
-                        ok = false
-                    }
-
-                    first = false
-                    if (!ok)
-                    {
-                        break
-                    }
-                }
-
-                def rowNum = parser.recordNumber + 1
-                if (!record.get('numerator'))
+        if (ok)
+        {
+            rows.eachWithIndex
+            { record, idx ->
+                def rowNum = idx + 2
+                if (!record.numerator)
                 {
                     log.error "In ${params.contrastFile} file,  No 'numerator'  name set on line ${rowNum}."
                     ok = false
-                } 
-                
-                if (!record.get('denominator'))
+                }
+
+                if (!record.denominator)
                 {
                     log.error "In ${params.contrastFile} file,  No 'denominator'  name set on line ${rowNum}."
                     ok = false
-                } 
+                }
             }
         }
     }
@@ -471,5 +415,3 @@ def checkRNAseqContrastFile(params)
 
     return ok
 }
-
-

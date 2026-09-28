@@ -14,11 +14,11 @@ def logException(e)
     {
         throw e
     }
-    catch (java.lang.reflect.InvocationTargetException ite)
+    catch (java.lang.reflect.InvocationTargetException _ite)
     {
         forLogging = e.targetException
     }
-    catch (Throwable t)
+    catch (Throwable _t)
     {
     }
 

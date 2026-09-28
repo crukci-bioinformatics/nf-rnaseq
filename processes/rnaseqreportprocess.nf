@@ -1,7 +1,6 @@
 /*
 * process for running RNAseq report
 */
-import nextflow.util.BlankSeparatedList
 /*
 * TODO: Currently, this process copies everything to the work directory (stageInMode 'copy')
 * A report is then generated
@@ -9,19 +8,16 @@ import nextflow.util.BlankSeparatedList
 */
 
 
-process RNASEQREPORT () {
+process RNASEQREPORT {
 
     //label 'report'
 
     cpus 4
     memory { 8.GB * task.attempt }
-    time 3.hour
+    time 3.h
     maxRetries 2
 
     stageInMode 'copy'
-    //publishDir "${projectDir}", mode:"copy"
-    //publishDir "${workDir}", mode:"copy"
-    publishDir "${launchDir}", mode:"copy"
 
     input:
         tuple val(projectName),
@@ -40,14 +36,14 @@ process RNASEQREPORT () {
             file(contrastFile),
             file(tx2gene),
             file(gtfFile),
-            file(quantOutDir),
             file(rScript),
-            file(rmdFile)
+            file(rmdFile),
+            path(quantResults, stageAs: 'quantOut/*')
     output:
-        path "${countsDir}"
-        path "${DeOutDir}" 
-        path "${templateDir}"
-        path "${reportFile}"
+        path "${countsDir}", emit: counts
+        path "${DeOutDir}", emit: de
+        path "${templateDir}", emit: template
+        path "${reportFile}", emit: report
 
     script:
     """
@@ -60,7 +56,7 @@ process RNASEQREPORT () {
         --pValCutoff="${pValCutoff}" \
         --genesToShow="${genesToShow}" \
         --samplesheet="${sampleSheet}" \
-        --quantOut="${quantOutDir}" \
+        --quantOut="quantOut" \
         --tx2geneFile="${tx2gene}" \
         --gtfFile="${gtfFile}" \
         --contrastFile="${contrastFile}" \
@@ -68,5 +64,11 @@ process RNASEQREPORT () {
         --DeOutDir="${DeOutDir}" \
         --templateDir="${templateDir}" \
         --reportFile="${reportFile}"
-    """ 
+    """
+
+    stub:
+    """
+    mkdir -p "${countsDir}" "${DeOutDir}" "${templateDir}"
+    touch "${reportFile}"
+    """
 }
